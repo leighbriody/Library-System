@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>BorrowBookCommand.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">commands</a> &gt; <span class="el_source">BorrowBookCommand.java</span></div><h1>BorrowBookCommand.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package commands;
+
+import business.Book;
+import business.Loan;
+import business.User;
+import static com.sun.corba.se.spi.presentation.rmi.StubAdapter.request;
+import daos.BookDao;
+import daos.LoanDao;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author Osama Kheireddine
+ */
+<span class="nc" id="L24">public class BorrowBookCommand implements Command {</span>
+
+    /**
+     * The purpose of this method is to allow a user to make a loan. We will
+     * take parameters entered and do the appropriate work needed
+     *
+     * @param request
+     * @param response
+     * @return To the user's current loans page if successful or error.jsp if
+     * unsuccessful.
+     */
+    @Override
+    public String doAction(HttpServletRequest request, HttpServletResponse response) {
+<span class="nc" id="L37">        String forwardToJsp = &quot;error.jsp&quot;;</span>
+
+        //get the session
+<span class="nc" id="L40">        HttpSession session = request.getSession();</span>
+        //get the user(for getting id)
+<span class="nc" id="L42">        User u = (User) session.getAttribute(&quot;loggedInUser&quot;);</span>
+<span class="nc" id="L43">        int userId = u.getUserId();</span>
+
+        //if the user is logged in...
+<span class="nc bnc" id="L46" title="All 4 branches missed.">        if (u.getUsername() != null &amp;&amp; !u.getUsername().equals(&quot;&quot;)) {</span>
+            //get the fields needed to make a loan.
+            //bookId
+<span class="nc" id="L49">            String bookIdAsStr = request.getParameter(&quot;bookId&quot;);</span>
+            //if the loan parameters are empty send the user to the borrow book page
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (bookIdAsStr == null) {</span>
+<span class="nc" id="L52">                forwardToJsp = &quot;borrowBook.jsp&quot;;</span>
+            } else {
+                //convert to int
+<span class="nc" id="L55">                int bookId = Integer.parseInt(bookIdAsStr);</span>
+                //to get the due date and taken date we need to add 2 weeks on to the current date
+                //this means we need to do some work and make a calendar instance
+                //date now..
+<span class="nc" id="L59">                LocalDate date = java.time.LocalDate.now();</span>
+                //date in two weeks
+<span class="nc" id="L61">                LocalDate dateInTwoWeeks = date.plusWeeks(2);</span>
+                //now parse them to string
+<span class="nc" id="L63">                String currentDate = date.toString();</span>
+<span class="nc" id="L64">                String twoWeeksDate = dateInTwoWeeks.toString();</span>
+
+                //create the loan and insert it into the db
+<span class="nc" id="L67">                LoanDao lDao = new LoanDao(&quot;librarydb&quot;);</span>
+                //decrement the book in the db based off the id
+<span class="nc" id="L69">                BookDao bDao = new BookDao(&quot;librarydb&quot;);</span>
+                //cannot borrow the same book twice
+<span class="nc" id="L71">                boolean bookOnLoan = lDao.isBookOnLoan(bookId, userId);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">                if (!bookOnLoan) {</span>
+                    //so we don't loan a minus amount of books (i.e they don't exist)
+<span class="nc bnc" id="L74" title="All 4 branches missed.">                    if (bDao.decreaseBookQty(bookId, 1) == true &amp;&amp; bDao.getBookById(bookId).getQuantity() &gt; -1) {</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">                        if (lDao.createLoan(bookId, userId, currentDate, twoWeeksDate) == true) {</span>
+<span class="nc" id="L76">                            forwardToJsp = &quot;viewCurrentLoans.jsp&quot;;</span>
+                        } else {
+<span class="nc" id="L78">                            String errorMessage = &quot;An error occurred while creating your loan... Please&lt;a href='FactoryServlet?action=borrowBook'&gt;Try Again&lt;/a&gt;&quot;;</span>
+<span class="nc" id="L79">                            session = request.getSession();</span>
+<span class="nc" id="L80">                            session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+<span class="nc" id="L81">                        }</span>
+                    } else {
+<span class="nc" id="L83">                        String errorMessage = &quot;Could not loan book Please... &lt;a href='FactoryServlet?action=borrowBook'&gt;Try Again&lt;/a&gt;&quot;;</span>
+<span class="nc" id="L84">                        session = request.getSession();</span>
+<span class="nc" id="L85">                        session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+<span class="nc" id="L86">                    }</span>
+                } 
+            else {
+<span class="nc" id="L89">                    String errorMessage = &quot;This book is already on loan... &lt;a href='FactoryServlet?action=borrowBook'&gt;Go back&lt;/a&gt;&quot;;</span>
+<span class="nc" id="L90">                    session = request.getSession();</span>
+<span class="nc" id="L91">                    session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+                }
+            }
+<span class="nc" id="L94">        } else {</span>
+<span class="nc" id="L95">            String errorMessage = &quot;An error occurred, you have been logged out... Please&lt;a href='FactoryServlet?action=login'&gt;Login&lt;/a&gt;&quot;;</span>
+<span class="nc" id="L96">            session = request.getSession();</span>
+<span class="nc" id="L97">            session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+        }
+<span class="nc" id="L99">        return forwardToJsp;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

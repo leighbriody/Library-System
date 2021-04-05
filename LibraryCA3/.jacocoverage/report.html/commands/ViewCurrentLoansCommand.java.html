@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ViewCurrentLoansCommand.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">commands</a> &gt; <span class="el_source">ViewCurrentLoansCommand.java</span></div><h1>ViewCurrentLoansCommand.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package commands;
+
+import business.Loan;
+import business.User;
+import daos.BookDao;
+import daos.LoanDao;
+import daos.UserDao;
+import java.util.ArrayList;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author Osama Kheireddine
+ */
+<span class="nc" id="L22">public class ViewCurrentLoansCommand implements Command {</span>
+    
+    /**
+     * Here the user will be able to view their current loans &amp; if any are overdue 
+     * @param request
+     * @param response
+     * @return Returns the user to their current loan page
+     */
+    @Override
+    public String doAction(HttpServletRequest request, HttpServletResponse response) {
+<span class="nc" id="L32">        String forwardToJsp = &quot;error.jsp&quot;;</span>
+
+        //we need to get the user's details to make sure the page is tailored to their information
+<span class="nc" id="L35">        HttpSession session = request.getSession();</span>
+<span class="nc" id="L36">        User userSession = (User) session.getAttribute(&quot;loggedInUser&quot;);</span>
+<span class="nc" id="L37">        String username = userSession.getUsername();</span>
+        //see if there is an active user session (this is done by verifying a username is supplied)
+<span class="nc bnc" id="L39" title="All 4 branches missed.">        if (username != null &amp;&amp; !username.equals(&quot;&quot;)) {</span>
+            //now forward the user to the viewCurrentLoans webpage
+<span class="nc" id="L41">            forwardToJsp = &quot;viewCurrentLoans.jsp&quot;;</span>
+        } else {
+            // Send the user to the error page and inform them
+<span class="nc" id="L44">            String errorMessage = &quot;There seems to be no username... Please &lt;a href='login.jsp'&gt;Login&lt;/a&gt; and try again.&quot;;</span>
+<span class="nc" id="L45">            session = request.getSession();</span>
+<span class="nc" id="L46">            session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+        }
+
+<span class="nc" id="L49">        return forwardToJsp;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>GenreDao.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">daos</a> &gt; <span class="el_source">GenreDao.java</span></div><h1>GenreDao.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package daos;
+
+import business.Genre;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author User
+ */
+public class GenreDao extends Dao implements GenreDaoInterface{
+
+    public GenreDao(String databaseName) {
+<span class="nc" id="L22">        super(databaseName);</span>
+<span class="nc" id="L23">    }</span>
+
+     @Override
+     /**
+      * This method will return a array list of all genres from which will be displayed to the user
+      */
+    public ArrayList&lt;Genre&gt; showAllGenres(){
+<span class="nc" id="L30">        Connection con = null;</span>
+<span class="nc" id="L31">        PreparedStatement ps = null;</span>
+<span class="nc" id="L32">        ResultSet rs = null;</span>
+<span class="nc" id="L33">        ArrayList&lt;Genre&gt; list = new ArrayList();</span>
+
+        try {
+<span class="nc" id="L36">            con = getConnection();</span>
+
+<span class="nc" id="L38">            String query = &quot;Select * from genre&quot;;</span>
+<span class="nc" id="L39">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L40">            rs = ps.executeQuery();</span>
+     
+<span class="nc bnc" id="L42" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L43">                Genre g = new Genre(rs.getInt(&quot;genre_id&quot;), rs.getString(&quot;genre_name&quot;));</span>
+<span class="nc" id="L44">                list.add(g);</span>
+<span class="nc" id="L45">            } </span>
+<span class="nc" id="L46">        } catch (SQLException e) {</span>
+<span class="nc" id="L47">            System.out.println(&quot;Exception occured in the showAllGenres() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L49">            try {</span>
+<span class="nc bnc" id="L50" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L51">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L53" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L54">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L56" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L57">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L59">            } catch (SQLException e) {</span>
+<span class="nc" id="L60">                System.out.println(&quot;Exception occured in the finally section of the displayAllGenres() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L61">            }</span>
+<span class="nc" id="L62">        }</span>
+
+<span class="nc" id="L64">        return list;</span>
+    }
+    
+    @Override
+    /**
+     * This method will alow the user to check if the genre passed as a paramater exists
+     * @param genre
+     */
+    public boolean checkIfGenreExists(String genre) {
+       
+<span class="nc" id="L74">      Connection con = null;</span>
+<span class="nc" id="L75">        PreparedStatement ps = null;</span>
+<span class="nc" id="L76">        ResultSet rs = null;</span>
+
+<span class="nc" id="L78">        boolean ifCoAuthorExists = false;</span>
+
+        try {
+<span class="nc" id="L81">            con = getConnection();</span>
+            
+            //This is not working, it will only return true if 2 authors and 0 are entered but not 3 ids
+<span class="nc" id="L84">            String query = &quot;Select * from genre where genre_name = ? &quot;;</span>
+<span class="nc" id="L85">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L86">            ps.setString(1, genre);</span>
+<span class="nc" id="L87">            rs = ps.executeQuery();</span>
+
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            if (rs.next()) {</span>
+                //it means the username returned something therfore a coAuthor with 1 or 2 of these names exists
+<span class="nc" id="L91">                ifCoAuthorExists = false;</span>
+            } else {
+<span class="nc" id="L93">                ifCoAuthorExists = true;</span>
+
+            }
+<span class="nc" id="L96">        } catch (SQLException e) {</span>
+<span class="nc" id="L97">            System.out.println(&quot;Exception occured in the checkIfGenreExists() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L99">            try {</span>
+<span class="nc bnc" id="L100" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L101">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L103" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L104">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L106" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L107">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L109">            } catch (SQLException e) {</span>
+<span class="nc" id="L110">                System.out.println(&quot;Exception occured in the finally section of the checkIfGenreExists() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L111">            }</span>
+<span class="nc" id="L112">        }</span>
+
+<span class="nc" id="L114">        return ifCoAuthorExists;</span>
+
+    }   
+
+    /**
+     *This method will allow the user to add a new genre
+     * @param newGenre
+     * @return
+     */
+    @Override
+    
+    public boolean addGenre(Genre newGenre) {
+
+<span class="nc" id="L127">        Connection con = null;</span>
+<span class="nc" id="L128">        PreparedStatement ps = null;</span>
+<span class="nc" id="L129">        ResultSet rs = null;</span>
+
+<span class="nc" id="L131">        int rowsAffected = 0;</span>
+
+<span class="nc" id="L133">        boolean ifaddGenreAdded = false;</span>
+
+        try {
+<span class="nc" id="L136">            con = getConnection();</span>
+
+<span class="nc" id="L138">            String genre = newGenre.getGenreName();</span>
+                        
+<span class="nc" id="L140">            String query = &quot;INSERT INTO genre VALUES (null,?)&quot;;</span>
+<span class="nc" id="L141">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L142">            ps.setString(1, genre);</span>
+          
+            
+<span class="nc" id="L145">            rowsAffected = ps.executeUpdate();</span>
+
+<span class="nc" id="L147">        } catch (SQLException e) {</span>
+<span class="nc" id="L148">            System.out.println(&quot;Exception occured in the addGenre() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L150">            try {</span>
+<span class="nc bnc" id="L151" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L152">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L154" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L155">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L157" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L158">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L160">            } catch (SQLException e) {</span>
+<span class="nc" id="L161">                System.out.println(&quot;Exception occured in the finally section of the addGenre() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L162">            }</span>
+<span class="nc" id="L163">        }</span>
+
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (rowsAffected &gt; 0) {</span>
+<span class="nc" id="L166">            return true;</span>
+        } else {
+<span class="nc" id="L168">            return false;</span>
+        }
+
+        
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

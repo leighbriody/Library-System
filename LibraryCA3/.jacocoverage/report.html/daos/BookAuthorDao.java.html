@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>BookAuthorDao.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">daos</a> &gt; <span class="el_source">BookAuthorDao.java</span></div><h1>BookAuthorDao.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package daos;
+
+import business.Author;
+import business.Book;
+import business.BookAuthor;
+import business.Genre;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author Brianan Johnson
+// */
+public class BookAuthorDao extends Dao implements BookAuthorDaoInterface {
+
+    public BookAuthorDao(String databaseName) {
+<span class="nc" id="L27">        super(databaseName);</span>
+<span class="nc" id="L28">    }</span>
+
+   @Override
+  /**
+   * Author Brianan Johnson
+   * Method has been tested
+   * @return List of all book id's and their associated authors
+   * 
+   */
+    public ArrayList&lt;BookAuthor&gt; displayAllBooksAndAuthors() {
+<span class="nc" id="L38">        Connection con = null;</span>
+<span class="nc" id="L39">        PreparedStatement ps = null;</span>
+<span class="nc" id="L40">        ResultSet rs = null;</span>
+<span class="nc" id="L41">        ArrayList&lt;BookAuthor&gt; list = new ArrayList();</span>
+
+        try {
+<span class="nc" id="L44">            con = getConnection();</span>
+
+<span class="nc" id="L46">            String query = &quot;Select * from bookauthor WHERE status = 1&quot;;</span>
+<span class="nc" id="L47">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L48">            rs = ps.executeQuery();</span>
+
+<span class="nc bnc" id="L50" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L51">                BookAuthor a = new BookAuthor(rs.getInt(&quot;book_id&quot;), rs.getInt(&quot;author_id&quot;));</span>
+<span class="nc" id="L52">                list.add(a);</span>
+<span class="nc" id="L53">            }</span>
+<span class="nc" id="L54">        } catch (SQLException e) {</span>
+<span class="nc" id="L55">            System.out.println(&quot;Exception occured in the displayAllBooksAndAuthors() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L57">            try {</span>
+<span class="nc bnc" id="L58" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L59">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L61" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L62">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L64" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L65">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L67">            } catch (SQLException e) {</span>
+<span class="nc" id="L68">                System.out.println(&quot;Exception occured in the finally section of the displayAllBooksAndAuthors() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L69">            }</span>
+<span class="nc" id="L70">        }</span>
+
+<span class="nc" id="L72">        return list;</span>
+    }
+
+    
+    
+    /**
+     * Author Brianan Johnson
+     * Method will add a book and author relationship to the bookauthor table
+     * First will will select the bookid from the book table, then select the 
+     * author id from the author table, and create a new record in the bookauthor table
+     * which will generate it's own unique id.  
+     * A book can have many authors.
+     * @param bookId
+     * @param authorId
+     * @return True if table has been updated
+     */
+    @Override
+    public boolean addBookAuthor(int bookId, int authorId) {
+        
+<span class="nc" id="L91">        Connection con = null;</span>
+<span class="nc" id="L92">        PreparedStatement ps = null;</span>
+<span class="nc" id="L93">        ResultSet rs = null;</span>
+<span class="nc" id="L94">        int rowsAffected = 0;</span>
+<span class="nc" id="L95">        boolean bookAuthorAdded = false;</span>
+      
+        
+              
+        try{
+<span class="nc" id="L100">            con = getConnection();</span>
+                       
+            //Query to add the book author to the bookauthor table
+<span class="nc" id="L103">            String query3 = &quot;INSERT INTO bookauthor (book_id, author_id)values(?,?)&quot;;</span>
+<span class="nc" id="L104">            ps = con.prepareStatement(query3);</span>
+<span class="nc" id="L105">            ps.setInt(1, bookId);</span>
+<span class="nc" id="L106">            ps.setInt(2, authorId);            </span>
+           
+<span class="nc" id="L108">            rowsAffected = ps.executeUpdate();  </span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">            if(rowsAffected &gt; 0){</span>
+<span class="nc" id="L110">                bookAuthorAdded = true;</span>
+            }
+            
+        
+<span class="nc" id="L114">    }   catch (SQLException e) {   </span>
+<span class="nc" id="L115">           System.out.println(&quot;Exception occured in the addBookAuthor() method: &quot; + e.getMessage());  </span>
+         
+            } finally {
+<span class="nc" id="L118">            try {</span>
+<span class="nc bnc" id="L119" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L120">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L122" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L123">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L125" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L126">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L128">            } catch (SQLException e) {  </span>
+<span class="nc" id="L129">                System.out.println(&quot;Exception occured in addBookAuthor() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L130">            }  </span>
+     
+<span class="nc" id="L132">    }</span>
+       
+<span class="nc" id="L134">        return bookAuthorAdded;</span>
+    
+    }
+    
+    @Override
+    public boolean disableBookAuthor(int bookId, int authorId) {
+<span class="nc" id="L140">      Connection con = null;</span>
+<span class="nc" id="L141">      PreparedStatement ps = null;</span>
+<span class="nc" id="L142">      ResultSet rs = null;</span>
+<span class="nc" id="L143">      int rowsAffected = 0;</span>
+<span class="nc" id="L144">      boolean bookDisabled = false;</span>
+      
+      try {
+<span class="nc" id="L147">            con = getConnection(); </span>
+        
+<span class="nc" id="L149">      String query = &quot;UPDATE  bookauthor SET status = 0 WHERE book_id = ? AND author_id = ? AND status = 1 &quot;;</span>
+<span class="nc" id="L150">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L151">            ps.setInt(1, bookId);</span>
+<span class="nc" id="L152">            ps.setInt(2, authorId); </span>
+                  
+<span class="nc" id="L154">            rowsAffected = ps.executeUpdate();</span>
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">            if (rowsAffected &gt; 0) {</span>
+<span class="nc" id="L157">                bookDisabled = true;</span>
+            }else{
+<span class="nc" id="L159">                bookDisabled = false;</span>
+<span class="nc" id="L160">                System.out.println(&quot;Sorry that book author does not exist&quot;);</span>
+            }
+
+<span class="nc" id="L163">        } catch (SQLException e) {</span>
+<span class="nc" id="L164">            System.out.println(&quot;Exception occured in the disableBook() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L166">            try {</span>
+<span class="nc bnc" id="L167" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L168">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L170" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L171">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L173" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L174">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L176">            } catch (SQLException e) {</span>
+<span class="nc" id="L177">                System.out.println(&quot;Exception occured in the finally section of the disableBook() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L178">            }</span>
+<span class="nc" id="L179">        }</span>
+
+<span class="nc" id="L181">        return bookDisabled;</span>
+    }  
+
+     @Override
+    public boolean enableBookAuthor(int bookId, int authorId) {
+<span class="nc" id="L186">      Connection con = null;</span>
+<span class="nc" id="L187">      PreparedStatement ps = null;</span>
+<span class="nc" id="L188">      ResultSet rs = null;</span>
+<span class="nc" id="L189">      int rowsAffected = 0;</span>
+<span class="nc" id="L190">      boolean bookEnabled = false;</span>
+      
+      try {
+<span class="nc" id="L193">            con = getConnection(); </span>
+        
+<span class="nc" id="L195">      String query = &quot;UPDATE  bookauthor SET status = 1 WHERE book_id = ? AND author_id = ? &quot;;</span>
+<span class="nc" id="L196">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L197">            ps.setInt(1, bookId);</span>
+<span class="nc" id="L198">            ps.setInt(2, authorId); </span>
+                  
+<span class="nc" id="L200">            rowsAffected = ps.executeUpdate();</span>
+
+<span class="nc bnc" id="L202" title="All 2 branches missed.">            if (rowsAffected &gt; 0) {</span>
+<span class="nc" id="L203">                bookEnabled = true;</span>
+            }
+
+<span class="nc" id="L206">        } catch (SQLException e) {</span>
+<span class="nc" id="L207">            System.out.println(&quot;Exception occured in the disableBook() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L209">            try {</span>
+<span class="nc bnc" id="L210" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L211">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L213" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L214">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L216" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L217">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L219">            } catch (SQLException e) {</span>
+<span class="nc" id="L220">                System.out.println(&quot;Exception occured in the finally section of the disableBook() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L221">            }</span>
+<span class="nc" id="L222">        }</span>
+
+<span class="nc" id="L224">        return bookEnabled;</span>
+    }  
+ 
+      @Override
+      public ArrayList&lt;BookAuthor&gt; getAllBookAuthors(){
+       
+<span class="nc" id="L230">        Connection con = null;</span>
+<span class="nc" id="L231">        PreparedStatement ps = null;</span>
+<span class="nc" id="L232">        ResultSet rs = null;</span>
+<span class="nc" id="L233">        ArrayList&lt;BookAuthor&gt; list = new ArrayList();</span>
+        
+
+        try {
+<span class="nc" id="L237">            con = getConnection();</span>
+
+<span class="nc" id="L239">            String query = &quot;Select * from bookauthor WHERE status =1&quot;;</span>
+<span class="nc" id="L240">            ps = con.prepareStatement(query);          </span>
+<span class="nc" id="L241">            rs = ps.executeQuery();</span>
+
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            while (rs.next()) {</span>
+                //If rs.next this means the book id worked so we will return the quantity
+<span class="nc" id="L245">                BookAuthor ba = new BookAuthor(rs.getInt(&quot;book_id&quot;),rs.getInt(&quot;author_id&quot;));</span>
+<span class="nc" id="L246">                list.add(ba);</span>
+            
+<span class="nc" id="L248">            }</span>
+<span class="nc" id="L249">        } catch (SQLException e) {</span>
+<span class="nc" id="L250">            System.out.println(&quot;Exception occured in the getBookAuthorID() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L252">            try {</span>
+<span class="nc bnc" id="L253" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L254">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L256" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L257">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L259" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L260">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L262">            } catch (SQLException e) {</span>
+<span class="nc" id="L263">                System.out.println(&quot;Exception occured in the finally section of the getBookAuthorID() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L264">            }</span>
+<span class="nc" id="L265">        }</span>
+<span class="nc" id="L266">        return list;</span>
+    }
+    @Override
+    public boolean deleteBookAuthor(int bookId, int authorId) {
+<span class="nc" id="L270">      Connection con = null;</span>
+<span class="nc" id="L271">      PreparedStatement ps = null;</span>
+<span class="nc" id="L272">      ResultSet rs = null;</span>
+<span class="nc" id="L273">      int rowsAffected = 0;</span>
+<span class="nc" id="L274">      boolean bookDeleted = false;</span>
+      
+      try {
+<span class="nc" id="L277">            con = getConnection(); </span>
+        
+<span class="nc" id="L279">      String query = &quot;DELETE from  bookauthor WHERE book_id = ? AND author_id = ? &quot;;</span>
+<span class="nc" id="L280">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L281">            ps.setInt(1, bookId);</span>
+<span class="nc" id="L282">            ps.setInt(2, authorId); </span>
+                  
+<span class="nc" id="L284">            rowsAffected = ps.executeUpdate();</span>
+
+<span class="nc bnc" id="L286" title="All 2 branches missed.">            if (rowsAffected &gt; 0) {</span>
+<span class="nc" id="L287">                bookDeleted = true;</span>
+            }
+
+<span class="nc" id="L290">        } catch (SQLException e) {</span>
+<span class="nc" id="L291">            System.out.println(&quot;Exception occured in the deleteBookAuthor() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L293">            try {</span>
+<span class="nc bnc" id="L294" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L295">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L297" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L298">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L300" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L301">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L303">            } catch (SQLException e) {</span>
+<span class="nc" id="L304">                System.out.println(&quot;Exception occured in the finally section of the deleteBookAuthor() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L305">            }</span>
+<span class="nc" id="L306">        }</span>
+
+<span class="nc" id="L308">        return bookDeleted;</span>
+    }  
+
+    
+   /**
+    * pass in the id of an author and return the name from the author table
+    * @param AuthorId
+    * @return 
+    */
+    @Override
+    public ArrayList&lt;Author&gt; displayAuthorsByName(int AuthorId) {
+        
+<span class="nc" id="L320">        ArrayList&lt;Author&gt; authors = new ArrayList();</span>
+        
+<span class="nc" id="L322">        Connection conn = null;</span>
+<span class="nc" id="L323">        PreparedStatement ps = null;</span>
+<span class="nc" id="L324">        ResultSet rs = null;</span>
+        
+        try
+        {
+        // Get a connection to the database
+<span class="nc" id="L329">            conn = getConnection();</span>
+            
+            // Set up the SQL and compile it for the database
+<span class="nc" id="L332">            String query = &quot;Select * from authors where author_id = ? AND status = 1&quot;;</span>
+<span class="nc" id="L333">            ps = conn.prepareStatement(query);</span>
+            
+<span class="nc" id="L335">            ps.setInt(1,AuthorId);</span>
+            
+            //Run query and get results
+<span class="nc" id="L338">            rs = ps.executeQuery();    </span>
+            
+<span class="nc bnc" id="L340" title="All 2 branches missed.">            while(rs.next())</span>
+            {
+<span class="nc" id="L342">              Author a = new Author(rs.getInt(&quot;author_id&quot;),rs.getString(&quot;author_first_name&quot;),</span>
+<span class="nc" id="L343">              rs.getString(&quot;author_last_name&quot;));             </span>
+                
+<span class="nc" id="L345">              authors.add(a);</span>
+<span class="nc" id="L346">            }</span>
+        }
+<span class="nc" id="L348">        catch(SQLException e)</span>
+        {
+<span class="nc" id="L350">            System.out.println(&quot;An exception occurred in the displayAuthorsByName(): &quot; + e.getMessage());</span>
+        }
+        finally
+        {
+            // Close resultset
+<span class="nc" id="L355">            try{</span>
+<span class="nc bnc" id="L356" title="All 6 branches missed.">                if(rs != null)</span>
+                {
+<span class="nc" id="L358">                    rs.close();</span>
+                }
+            }
+<span class="nc" id="L361">            catch(SQLException e)</span>
+            {
+<span class="nc" id="L363">                System.out.println(&quot;An exception occurred when closing the ResultSet of the displayAuthorsByName(): &quot; + e.getMessage());</span>
+<span class="nc" id="L364">            }</span>
+            // Close prepared statement
+            try{
+<span class="nc bnc" id="L367" title="All 6 branches missed.">                if(ps != null)</span>
+                {
+<span class="nc" id="L369">                    ps.close();</span>
+                }
+            }
+<span class="nc" id="L372">            catch(SQLException e)</span>
+            {
+<span class="nc" id="L374">                System.out.println(&quot;An exception occurred when closing the PreparedStatement of the displayAuthorsByName(): &quot; + e.getMessage());</span>
+<span class="nc" id="L375">            }</span>
+            // Close connection
+<span class="nc" id="L377">            freeConnection(conn);</span>
+<span class="nc" id="L378">        }</span>
+        
+        // Return results
+<span class="nc" id="L381">        return authors;</span>
+    }    
+
+    @Override
+    public ArrayList&lt;Book&gt; displayBooksByName(int BookId) {
+       
+<span class="nc" id="L387">       ArrayList&lt;Book&gt; books = new ArrayList();</span>
+        
+<span class="nc" id="L389">        Connection conn = null;</span>
+<span class="nc" id="L390">        PreparedStatement ps = null;</span>
+<span class="nc" id="L391">        ResultSet rs = null;</span>
+        
+        try
+        {
+        // Get a connection to the database
+<span class="nc" id="L396">            conn = getConnection();</span>
+            
+            // Set up the SQL and compile it for the database
+<span class="nc" id="L399">            String query = &quot;Select * from books where book_id = ? AND status = 1&quot;;</span>
+<span class="nc" id="L400">            ps = conn.prepareStatement(query);</span>
+            
+<span class="nc" id="L402">            ps.setInt(1,BookId);</span>
+            
+            //Run query and get results
+<span class="nc" id="L405">            rs = ps.executeQuery();    </span>
+            
+<span class="nc bnc" id="L407" title="All 2 branches missed.">            while(rs.next())</span>
+            {
+              
+              
+<span class="nc" id="L411">            Book b = new Book(rs.getInt(&quot;book_id&quot;),rs.getString(&quot;book_name&quot;),</span>
+<span class="nc" id="L412">            rs.getInt(&quot;genre&quot;),rs.getString(&quot;description&quot;), rs.getInt(&quot;quantity&quot;),</span>
+<span class="nc" id="L413">            rs.getDouble(&quot;overdue_fee_per_day&quot;));</span>
+                         
+<span class="nc" id="L415">              books.add(b);</span>
+<span class="nc" id="L416">            }</span>
+        }
+<span class="nc" id="L418">        catch(SQLException e)</span>
+        {
+<span class="nc" id="L420">            System.out.println(&quot;An exception occurred in the displayBooksByName(): &quot; + e.getMessage());</span>
+        }
+        finally
+        {
+            // Close resultset
+<span class="nc" id="L425">            try{</span>
+<span class="nc bnc" id="L426" title="All 6 branches missed.">                if(rs != null)</span>
+                {
+<span class="nc" id="L428">                    rs.close();</span>
+                }
+            }
+<span class="nc" id="L431">            catch(SQLException e)</span>
+            {
+<span class="nc" id="L433">                System.out.println(&quot;An exception occurred when closing the ResultSet of the displayBooksByName(): &quot; + e.getMessage());</span>
+<span class="nc" id="L434">            }</span>
+            // Close prepared statement
+            try{
+<span class="nc bnc" id="L437" title="All 6 branches missed.">                if(ps != null)</span>
+                {
+<span class="nc" id="L439">                    ps.close();</span>
+                }
+            }
+<span class="nc" id="L442">            catch(SQLException e)</span>
+            {
+<span class="nc" id="L444">                System.out.println(&quot;An exception occurred when closing the PreparedStatement of the displayBooksByName(): &quot; + e.getMessage());</span>
+<span class="nc" id="L445">            }</span>
+            // Close connection
+<span class="nc" id="L447">            freeConnection(conn);</span>
+<span class="nc" id="L448">        }</span>
+        
+        // Return results
+<span class="nc" id="L451">        return books;</span>
+       
+    }
+
+/**
+ * Checks the bookAuthor table for all records that have this author ID
+ * @param authorId
+ * @return ArrayList of bookIds
+ */
+    @Override
+    public ArrayList&lt;BookAuthor&gt; getBookIdByAuthorId(int authorId) {
+        
+<span class="nc" id="L463">        Connection con = null;</span>
+<span class="nc" id="L464">        PreparedStatement ps = null;</span>
+<span class="nc" id="L465">        ResultSet rs = null;</span>
+<span class="nc" id="L466">        ArrayList books = new ArrayList();</span>
+        
+
+        try {
+<span class="nc" id="L470">            con = getConnection();</span>
+
+<span class="nc" id="L472">            String query = &quot;Select * from bookauthor where author_id = ? AND status = 1 &quot;;</span>
+<span class="nc" id="L473">            ps = con.prepareStatement(query);</span>
+          
+          
+<span class="nc" id="L476">            ps.setInt(1, authorId);</span>
+<span class="nc" id="L477">            rs = ps.executeQuery();</span>
+
+<span class="nc bnc" id="L479" title="All 2 branches missed.">            while (rs.next()) {</span>
+             
+<span class="nc" id="L481">             BookAuthor ba = new BookAuthor();</span>
+<span class="nc" id="L482">             ba.setBook_id(rs.getInt(&quot;book_id&quot;));</span>
+             
+<span class="nc" id="L484">            books.add(ba);</span>
+             
+<span class="nc" id="L486">            }</span>
+<span class="nc" id="L487">        } catch (SQLException e) {</span>
+<span class="nc" id="L488">            System.out.println(&quot;Exception occured in the getBookIdByAuthorId() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L490">            try {</span>
+<span class="nc bnc" id="L491" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L492">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L494" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L495">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L497" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L498">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L500">            } catch (SQLException e) {</span>
+<span class="nc" id="L501">                System.out.println(&quot;Exception occured in the finally section of the getBookAuthorID() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L502">            }</span>
+<span class="nc" id="L503">        }</span>
+<span class="nc" id="L504">        return books;</span>
+    
+    }
+
+    @Override
+    public ArrayList displayGenreByName(int genreId) {
+<span class="nc" id="L510">        ArrayList&lt;Genre&gt; genre = new ArrayList();</span>
+        
+<span class="nc" id="L512">        Connection conn = null;</span>
+<span class="nc" id="L513">        PreparedStatement ps = null;</span>
+<span class="nc" id="L514">        ResultSet rs = null;</span>
+        
+        try
+        {
+        // Get a connection to the database
+<span class="nc" id="L519">            conn = getConnection();</span>
+            
+            // Set up the SQL and compile it for the database
+<span class="nc" id="L522">            String query = &quot;Select * from genre where genre_id = ? AND status = 1&quot;;</span>
+<span class="nc" id="L523">            ps = conn.prepareStatement(query);</span>
+            
+<span class="nc" id="L525">            ps.setInt(1,genreId);</span>
+            
+            //Run query and get results
+<span class="nc" id="L528">            rs = ps.executeQuery();    </span>
+            
+<span class="nc bnc" id="L530" title="All 2 branches missed.">            while(rs.next())</span>
+            {
+              
+              
+<span class="nc" id="L534">            Genre g = new Genre(rs.getInt(&quot;genre_id&quot;),rs.getString(&quot;genre_name&quot;));           </span>
+                         
+<span class="nc" id="L536">              genre.add(g);</span>
+<span class="nc" id="L537">            }</span>
+        }
+<span class="nc" id="L539">        catch(SQLException e)</span>
+        {
+<span class="nc" id="L541">            System.out.println(&quot;An exception occurred in the displayBooksByName(): &quot; + e.getMessage());</span>
+        }
+        finally
+        {
+            // Close resultset
+<span class="nc" id="L546">            try{</span>
+<span class="nc bnc" id="L547" title="All 6 branches missed.">                if(rs != null)</span>
+                {
+<span class="nc" id="L549">                    rs.close();</span>
+                }
+            }
+<span class="nc" id="L552">            catch(SQLException e)</span>
+            {
+<span class="nc" id="L554">                System.out.println(&quot;An exception occurred when closing the ResultSet of the displayBooksByName(): &quot; + e.getMessage());</span>
+<span class="nc" id="L555">            }</span>
+            // Close prepared statement
+            try{
+<span class="nc bnc" id="L558" title="All 6 branches missed.">                if(ps != null)</span>
+                {
+<span class="nc" id="L560">                    ps.close();</span>
+                }
+            }
+<span class="nc" id="L563">            catch(SQLException e)</span>
+            {
+<span class="nc" id="L565">                System.out.println(&quot;An exception occurred when closing the PreparedStatement of the displayBooksByName(): &quot; + e.getMessage());</span>
+<span class="nc" id="L566">            }</span>
+            // Close connection
+<span class="nc" id="L568">            freeConnection(conn);</span>
+<span class="nc" id="L569">        }</span>
+        
+        // Return results
+<span class="nc" id="L572">        return genre;</span>
+    }
+
+  
+    }
+        
+        
+        
+    
+
+    
+
+   
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

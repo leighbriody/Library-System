@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Pbkdf2.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">utilities</a> &gt; <span class="el_source">Pbkdf2.java</span></div><h1>Pbkdf2.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+// Code references https://adambard.com/blog/3-wrong-ways-to-store-a-password/
+package utilities;
+
+import java.security.SecureRandom;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
+/**
+ *Methods to hash and salt password with a random salt
+ * @author Brianan Johnson
+ */
+<span class="nc" id="L20">public class Pbkdf2 {</span>
+
+  
+   /**
+    * Author Brianan Johnson
+    * @param password
+    * @return Hashed password
+    * @throws NoSuchAlgorithmException 
+    * This exception is thrown when a particular cryptographic algorithm is requested but is not available in the environment.
+    * @throws InvalidKeySpecException 
+    * This is the exception for invalid key specifications.
+    */
+   public static String genPasswordHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+        //Iteration strengthen the hash of the password
+<span class="nc" id="L35">        int iterations = 1000;</span>
+<span class="nc" id="L36">        char[] chars = password.toCharArray();</span>
+<span class="nc" id="L37">        byte[] salt = getSalt();</span>
+         
+        //Create an instance of the PBEKeySpec
+<span class="nc" id="L40">        PBEKeySpec spec = new PBEKeySpec(chars, salt, iterations, 64 * 8);</span>
+        //Create a secret key using the algorithm
+<span class="nc" id="L42">        SecretKeyFactory skf = SecretKeyFactory.getInstance(&quot;PBKDF2WithHmacSHA1&quot;);        </span>
+<span class="nc" id="L43">        byte[] hash = skf.generateSecret(spec).getEncoded();</span>
+        
+        //Add the iterations salt and hash and convert to Hex so it can be output in a string
+<span class="nc" id="L46">        return iterations + &quot;:&quot; + toHex(salt) + &quot;:&quot; + toHex(hash);</span>
+    }
+    
+  /**
+   * Method to generate a random salt meaning no two stored passwords
+   * will be the same even if the original ones are
+   * @return
+   * @throws NoSuchAlgorithmException 
+   * This exception is thrown when a particular cryptographic algorithm is requested but is not available in the environment.
+   */
+    public static byte[] getSalt() throws NoSuchAlgorithmException
+    {
+        //Generate a random salt using the algorithm 
+<span class="nc" id="L59">        SecureRandom sr = SecureRandom.getInstance(&quot;SHA1PRNG&quot;);</span>
+<span class="nc" id="L60">        byte[] salt = new byte[16];</span>
+<span class="nc" id="L61">        sr.nextBytes(salt);</span>
+<span class="nc" id="L62">        return salt;</span>
+    }
+    
+    /**
+     * Convert the hash bytes to Hex so it can be output as a string
+    and does not ignore front trailing zeros which would happen if it was left as
+    a BigInteger
+     * @param array
+     * @return Hex conversion of byte
+     * @throws NoSuchAlgorithmException 
+     * This exception is thrown when a particular cryptographic algorithm is requested but is not available in the environment.
+     */
+     public static String toHex(byte[] array) throws NoSuchAlgorithmException
+    {
+<span class="nc" id="L76">        BigInteger bi = new BigInteger(1, array);</span>
+<span class="nc" id="L77">        String hex = bi.toString(16);</span>
+<span class="nc" id="L78">        int paddingLength = (array.length * 2) - hex.length();</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if(paddingLength &gt; 0)</span>
+        {
+<span class="nc" id="L81">            return String.format(&quot;%0&quot;  +paddingLength + &quot;d&quot;, 0) + hex;</span>
+        }else{
+<span class="nc" id="L83">            return hex;</span>
+        }
+    }
+   
+  
+     /**
+      * Method to validate the original password against the stored password
+      * @param originalPassword
+      * @param storedPassword
+      * @return True if password matches original, false if it does not
+      * @throws NoSuchAlgorithmException
+      * This exception is thrown when a particular cryptographic algorithm is requested but is not available in the environment.
+      * @throws InvalidKeySpecException 
+      * This is the exception for invalid key specifications.
+      */
+    
+     public static boolean validatePassword(String originalPassword, String storedPassword) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+        //Split the stored password so it can check just the hashed password and not the salt whch will be 
+        //different everytime
+<span class="nc" id="L103">        String[] parts = storedPassword.split(&quot;:&quot;);</span>
+<span class="nc" id="L104">        int iterations = Integer.parseInt(parts[0]);</span>
+<span class="nc" id="L105">        byte[] salt = fromHex(parts[1]);</span>
+<span class="nc" id="L106">        byte[] hash = fromHex(parts[2]);</span>
+         
+        //Create a testHash to check the array length against
+<span class="nc" id="L109">        PBEKeySpec spec = new PBEKeySpec(originalPassword.toCharArray(), salt, iterations, hash.length * 8);</span>
+<span class="nc" id="L110">        SecretKeyFactory skf = SecretKeyFactory.getInstance(&quot;PBKDF2WithHmacSHA1&quot;);</span>
+<span class="nc" id="L111">        byte[] testHash = skf.generateSecret(spec).getEncoded();</span>
+         
+<span class="nc" id="L113">        int diff = hash.length ^ testHash.length;</span>
+<span class="nc bnc" id="L114" title="All 4 branches missed.">        for(int i = 0; i &lt; hash.length &amp;&amp; i &lt; testHash.length; i++)</span>
+        {
+<span class="nc" id="L116">            diff |= hash[i] ^ testHash[i];</span>
+        }
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        return diff == 0;</span>
+    }
+    
+     /**
+      * Method to convert the hex into bytes 
+      * @param hex
+      * @return
+      * @throws NoSuchAlgorithmException 
+      * This exception is thrown when a particular cryptographic algorithm is requested but is not available in the environment.
+      */
+     public static byte[] fromHex(String hex) throws NoSuchAlgorithmException
+    {
+<span class="nc" id="L130">        byte[] bytes = new byte[hex.length() / 2];</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        for(int i = 0; i&lt;bytes.length ;i++)</span>
+        {
+<span class="nc" id="L133">            bytes[i] = (byte)Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);</span>
+        }
+<span class="nc" id="L135">        return bytes;</span>
+    }
+     
+     /**
+      * Method Testing creating and validating hashed and salted passwords
+      * @param args
+      * @throws NoSuchAlgorithmException
+      * This exception is thrown when a particular cryptographic algorithm is requested but is not available in the environment.
+      * @throws InvalidKeySpecException 
+      * This is the exception for invalid key specifications.
+      */
+    
+      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException 
+    {
+  
+        /*
+        String  originalPassword = &quot;password&quot;;
+        String generatedSecuredPasswordHash = genPasswordHash(originalPassword);
+        System.out.println(generatedSecuredPasswordHash.length());
+        System.out.println(generatedSecuredPasswordHash);
+          
+         
+        boolean matched = validatePassword(originalPassword, generatedSecuredPasswordHash);
+        System.out.println(&quot;The password enter password is &quot; + matched);
+         
+        matched = validatePassword(&quot;password1&quot;, generatedSecuredPasswordHash);
+        System.out.println(&quot;The password enter password1 is &quot; + matched);
+        
+        matched = validatePassword(&quot;fsdfs&quot;, generatedSecuredPasswordHash);
+        System.out.println(&quot;The password enter fsdfs is &quot; + matched);
+        */
+        
+        
+        
+        
+        
+<span class="nc" id="L171">    }</span>
+    
+     //Confirmation that the same password results with a different hash each time
+     
+    //1000:db64d2eebfc8390936e9c0ed47daff4a:70cbaaf593cc141978ca0d050dfe5cf494a9d62a290183bb13a3252e19057670f8c34aec4a1f32655955bd8898aa52a2c3c520e9c7188e5b281c95f70786a36c
+    //1000:c3a29fbbc15bfdcddf8cb33c6d122126:81a85a84013b26673d0dd17838836874bfb17572c43a4c6369727d32744568cc7ddd394301516f8f4c2595245fcb5d452daedc59ab89b4c1642b2208044f161f
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

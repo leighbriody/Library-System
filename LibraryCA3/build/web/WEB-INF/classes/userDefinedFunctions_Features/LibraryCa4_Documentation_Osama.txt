@@ -1,0 +1,92 @@
+/**FEATURES**/
+-OSAMA
+Extra Features I had deemed useful to the library service were:
+1. Retrieving a user based off password and username entered.
+
+2.Creating a function to add security answers to the db, for the use
+of changing passwords. This was an account security measure.
+
+3.Creating a function to retrieve pre-set account security questions. 
+Pre-set questions were used as user's are likely to not remember 
+their security questions.
+
+
+/**PROGRAMMER-DEFINED**/
+-OSAMA
+public User getUserByUsernamePassword(String username, String password) - 
+This method was created to retrieve user's details for logging in. 
+The reason this has both the username and password is for security reasons.
+User passwords are hashed using the Pbkdf2 algorithm.
+It's implementation can be seen in the SignUpCommand.java file here the user
+is successfully created and we then want to log in the user 
+after creating their account.
+
+public int addAnswer(int questionId, int userId, String answer) - 
+This method was created for adding a user's security answers into the db this was 
+done for the purpose of account security (i.e retrieving/changing password).
+User answers are hashed using the Pbkdf2 algorithm.
+
+public List<SecurityQuestions> getAllQuestions() - 
+The purpose for this functionality is to create a list of exisiting security
+questions and display them to a user for signing up their account 
+and also for changing passwords
+
+
+
+Leigh
+//Featurees of the website and where the code lies
+
+
+
+One of the main feature sets of this website is borrowing a book. On the borrowBook.jsp the user is provided with a selection list of
+all the current books available in the library , they can choose to borrow one of these books. Once they select to borrow one 
+there will be a loan object created and their user id will be linked to that loan. They will be assigned a due date , if they 
+do not return the book within this date they will have an overdue fee of 10 euro. The logic of this returning of a book 
+lies in the returnBookCommand java class.
+
+
+one of the features of this website is the ability of a user to be able to register and login. 
+On the register.jsp page the user presented with a form to fill in , the user must provide the details 
+necessary to register. This brings me on to the programmer defined feature.
+
+/**PROGRAMMER-DEFINED**/
+In the register form we ask the user for the credit card details, although it would not be a good idea 
+to store all the users credit card information in a database for the sake of this project I was assigned 
+with the task of encrypting these details. I decided to use AES encryption as it seems to be the most secure.
+I created a class called AES with the necessary method to entry and decrypt these details before storing 
+Then in a database.
+
+
+
+
+- BRIANAN
+Password hash
+ utilities/Pbkdf2.java signUp.jsp  login.jsp
+upon sign up the users entered password is hashed using Pbkdf2.java
+the hashed password is converted from bytes to a random string using a random salt
+this means that no two stored passwords will look the same even if the entered password is the same
+
+validating password
+upon register the  Pbkdf2.java uses a validatePassword() which converts the stored password
+in reverse converting it from a string into bytes. The bytes are then compared and if
+they match and the username matches that which is also stored in the users table
+then the user is allowed access to their account. 
+
+Filtering of books by author.
+displayBooksAndAuthors.jsp
+viewBooksByAuthor.java
+bookAuthor.java
+BookAuthorDao.java displayAllBooksAndAuthors()
+BookAuthorDao.java displayBooksByName()
+BookAuthorDao.java displayAuthorById()
+BookDao.java viewAllBooksByGenre()
+
+The books are saved in one table and the authors saved in another
+They are linked via a linking table which allows one book to have many authors 
+Each record in the bookAuthor table is made up of a compound key from the bookId and the authorId
+When the user clicks of view by author they are shown a list of book names and the authors attached.
+If the user clicks on the authors name they can view all books by that author
+Joseph Blotner for example only has one book but Wendy Wren has 4 books listed. 
+You can also filter the book by genre, while this works this is a slight problem
+on the viewBooksByGenre.jsp where it repeats itself and doesn't come out of the loop, 
+I ran out of time to fix the issue. 

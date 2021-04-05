@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SignUpCommand.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">commands</a> &gt; <span class="el_source">SignUpCommand.java</span></div><h1>SignUpCommand.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package commands;
+
+import business.SecurityAnswers;
+import business.User;
+import daos.CardsDao;
+import daos.SecurityAnswersDao;
+import daos.UserDao;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import utilities.AES;
+import utilities.Pbkdf2;
+
+<span class="nc" id="L23">public class SignUpCommand implements Command {</span>
+
+    /**
+     * @author Brianan Johnson &amp; Osama
+     * @param request
+     * @param response
+     * @return the user if successfully signed up, will be sent to the login
+     * page
+     */
+    @Override
+    public String doAction(HttpServletRequest request, HttpServletResponse response) {
+<span class="nc" id="L34">        String forwardToJsp = &quot;error.jsp&quot;;</span>
+
+        //Get the user object details from the sign up page
+<span class="nc" id="L37">        String username = request.getParameter(&quot;username&quot;);</span>
+<span class="nc" id="L38">        String password = request.getParameter(&quot;password&quot;);</span>
+<span class="nc" id="L39">        String firstName = request.getParameter(&quot;firstName&quot;);</span>
+<span class="nc" id="L40">        String lastName = request.getParameter(&quot;lastName&quot;);</span>
+<span class="nc" id="L41">        String email = request.getParameter(&quot;email&quot;);</span>
+
+        try {
+            //hash the password
+            //here we have to hash the password
+<span class="nc" id="L46">            password = Pbkdf2.genPasswordHash(password);</span>
+<span class="nc" id="L47">        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {</span>
+<span class="nc" id="L48">            Logger.getLogger(SignUpCommand.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L49">        }</span>
+
+        //obtain the security Question
+<span class="nc" id="L52">        int securityQuestion1 = Integer.parseInt(request.getParameter(&quot;securityQuestion1&quot;));</span>
+<span class="nc" id="L53">        String securityAnswer1 = request.getParameter(&quot;answer1&quot;);</span>
+<span class="nc" id="L54">        int securityQuestion2 = Integer.parseInt(request.getParameter(&quot;securityQuestion2&quot;));</span>
+<span class="nc" id="L55">        String securityAnswer2 = request.getParameter(&quot;answer2&quot;);</span>
+<span class="nc" id="L56">        int securityQuestion3 = Integer.parseInt(request.getParameter(&quot;securityQuestion3&quot;));</span>
+<span class="nc" id="L57">        String securityAnswer3 = request.getParameter(&quot;answer3&quot;);</span>
+
+        //Get the payment details
+<span class="nc" id="L60">        String cardNumber = request.getParameter(&quot;cardNumber&quot;);</span>
+<span class="nc" id="L61">        String expDate = request.getParameter(&quot;expiryDate&quot;);</span>
+<span class="nc" id="L62">        String cvv = request.getParameter(&quot;cvv&quot;);</span>
+
+        //Genereate a secret key
+<span class="nc" id="L65">        String secretKey = &quot;SecretKey&quot;;</span>
+
+        //Encrypt these card detaills
+<span class="nc" id="L68">        cardNumber = AES.encrypt(cardNumber, secretKey);</span>
+<span class="nc" id="L69">        expDate = AES.encrypt(expDate, secretKey);</span>
+<span class="nc" id="L70">        cvv = AES.encrypt(cvv, secretKey);</span>
+
+        // String answer = request.getParameter(&quot;answer&quot;);
+<span class="nc bnc" id="L73" title="All 6 branches missed.">        if (username != null &amp;&amp; !username.equals(&quot;&quot;)</span>
+<span class="nc bnc" id="L74" title="All 4 branches missed.">                &amp;&amp; password != null &amp;&amp; !password.equals(&quot;&quot;)</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">                &amp;&amp; email != null &amp;&amp; !email.equals(&quot;&quot;)) {</span>
+            //Set the user object variablles
+<span class="nc" id="L77">            UserDao uDao = new UserDao(&quot;librarydb&quot;);</span>
+<span class="nc" id="L78">            User u = new User();</span>
+
+            //need to add a method to get all usernames from the database
+            //this will be used to compare them against each other
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (uDao.getUserByUsername(username) != null) {</span>
+                //Username already exists
+<span class="nc" id="L84">                String errorMessage = &quot;Sorry but that username already exists. Please &lt;a href='signUp.jsp'&gt;go back&lt;/a&gt; and try again.&lt;br/&gt;Try a different username!&quot;;</span>
+<span class="nc" id="L85">                HttpSession session = request.getSession();</span>
+<span class="nc" id="L86">                session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+<span class="nc" id="L87">                forwardToJsp = &quot;error.jsp&quot;;</span>
+<span class="nc" id="L88">            } else {</span>
+
+                //Now we need to insert the users payment details into the database
+<span class="nc" id="L91">                CardsDao cards = new CardsDao(&quot;librarydb&quot;);</span>
+<span class="nc" id="L92">                cards.insertPaymentDetails(cardNumber, expDate, cvv);</span>
+
+                //we now need to the primary key of that card record for the foreign key in the users table
+<span class="nc" id="L95">                int paymentDetailsId = cards.getCardsRecentId();</span>
+
+<span class="nc" id="L97">                u.setPaymentDetailsId(paymentDetailsId);</span>
+<span class="nc" id="L98">                u.setUsername(username);</span>
+<span class="nc" id="L99">                u.setPassword(password);</span>
+<span class="nc" id="L100">                u.setFirstName(firstName);</span>
+<span class="nc" id="L101">                u.setLastName(lastName);</span>
+<span class="nc" id="L102">                u.setEmail(email);</span>
+
+<span class="nc" id="L104">                int rows = uDao.signUpUser(u.getUsername(), u.getEmail(), u.getPassword(), u.getFirstName(), u.getLastName(), u.getPaymentDetailsId());</span>
+
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                if (rows &gt; 0) {</span>
+
+<span class="nc" id="L108">                    forwardToJsp = &quot;login.jsp&quot;;</span>
+
+                    //as the user insert is a success we need to get thhe user id
+<span class="nc" id="L111">                    int userId = uDao.getUserId(username);</span>
+
+                    //default is -1 in method
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                    if (userId &gt; -1) {</span>
+                        //add the answers to the db if the user is successfully created
+<span class="nc" id="L116">                        SecurityAnswers sAns = new SecurityAnswers();</span>
+
+<span class="nc" id="L118">                        SecurityAnswersDao sAnsDao = new SecurityAnswersDao(&quot;login&quot;);</span>
+                        //set the user id
+<span class="nc" id="L120">                        sAns.setUserId(userId);</span>
+                        //set the question id
+<span class="nc" id="L122">                        sAns.setQuestionId(securityQuestion1);</span>
+                        try {
+                            //set the users question (we need to hash it, we can use the password hash method)
+<span class="nc" id="L125">                            securityAnswer1 = Pbkdf2.genPasswordHash(securityAnswer1);</span>
+<span class="nc" id="L126">                        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {</span>
+<span class="nc" id="L127">                            Logger.getLogger(SignUpCommand.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L128">                        }</span>
+                        //add it to the instance
+<span class="nc" id="L130">                        sAns.setAnswer(securityAnswer1);</span>
+                        //add it to the db
+<span class="nc" id="L132">                        sAnsDao.addAnswer(sAns.getQuestionId(), sAns.getUserId(), sAns.getAnswer());</span>
+                        //add the answers to the db if the user is successfully created
+<span class="nc" id="L134">                        SecurityAnswers sAns2 = new SecurityAnswers();</span>
+
+                        //set the user id
+<span class="nc" id="L137">                        sAns2.setUserId(userId);</span>
+                        //set the question id
+<span class="nc" id="L139">                        sAns2.setQuestionId(securityQuestion2);</span>
+                        try {
+                            //set the users question (we need to hash it, we can use the password hash method)
+<span class="nc" id="L142">                            securityAnswer2 = Pbkdf2.genPasswordHash(securityAnswer2);</span>
+<span class="nc" id="L143">                        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {</span>
+<span class="nc" id="L144">                            Logger.getLogger(SignUpCommand.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L145">                        }</span>
+                        //add it to the instance
+<span class="nc" id="L147">                        sAns2.setAnswer(securityAnswer2);</span>
+                        //add it to the db
+<span class="nc" id="L149">                        sAnsDao.addAnswer(sAns2.getQuestionId(), sAns2.getUserId(), sAns2.getAnswer());</span>
+
+                        //add the answers to the db if the user is successfully created
+<span class="nc" id="L152">                        SecurityAnswers sAns3 = new SecurityAnswers();</span>
+                        //set the user id
+<span class="nc" id="L154">                        sAns3.setUserId(userId);</span>
+                        //set the question id
+<span class="nc" id="L156">                        sAns3.setQuestionId(securityQuestion3);</span>
+                        try {
+                            //set the users question (we need to hash it, we can use the password hash method)
+<span class="nc" id="L159">                            securityAnswer3 = Pbkdf2.genPasswordHash(securityAnswer3);</span>
+<span class="nc" id="L160">                        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {</span>
+<span class="nc" id="L161">                            Logger.getLogger(SignUpCommand.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L162">                        }</span>
+                        //add it to the instance
+<span class="nc" id="L164">                        sAns3.setAnswer(securityAnswer3);</span>
+                        //add it to the db
+<span class="nc" id="L166">                        sAnsDao.addAnswer(sAns3.getQuestionId(), sAns3.getUserId(), sAns3.getAnswer());</span>
+
+                        //Sign up successful, log the user in
+<span class="nc" id="L169">                        u = uDao.getUserByUsernamePassword(username, password);</span>
+<span class="nc" id="L170">                        HttpSession session = request.getSession();</span>
+<span class="nc" id="L171">                        session.setAttribute(&quot;loggedInUser&quot;, u);</span>
+
+<span class="nc" id="L173">                        forwardToJsp = &quot;home.jsp&quot;;</span>
+                    }
+<span class="nc" id="L175">                } else {</span>
+                    //User couldn't be added to the db, output error
+                    //(username, hashedPassword, email, paymentDetailsId);
+<span class="nc" id="L178">                    String errorMessage = &quot;Sorry you could not be registered &quot; + &quot;username: &quot; + username + &quot;&lt;br/&gt; hashed pw: &quot; + password + &quot;&lt;br/&gt; email: &quot; + email + &quot;&lt;br/&gt; pay: &quot; + paymentDetailsId</span>
+                            + &quot;&lt;br/&gt; rows: &quot; + rows + &quot;&lt;br/&gt;Please &lt;a href='signUp.jsp'&gt;go back&lt;/a&gt; and try again.&lt;br/&gt;Try a different username!&quot;;
+<span class="nc" id="L180">                    HttpSession session = request.getSession();</span>
+<span class="nc" id="L181">                    session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+<span class="nc" id="L182">                    forwardToJsp = &quot;error.jsp&quot;;</span>
+                }
+            }
+<span class="nc" id="L185">        } else {</span>
+            // One or more fields were missing
+            // Send the user to the error page and inform them of this
+<span class="nc" id="L188">            String errorMessage = &quot;One or more fields were missing. Please &lt;a href='signUp.jsp'&gt;go back&lt;/a&gt; and try again.&quot; + &quot; &quot; + securityQuestion1;</span>
+<span class="nc" id="L189">            HttpSession session = request.getSession();</span>
+<span class="nc" id="L190">            session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+        }
+
+<span class="nc" id="L193">        return forwardToJsp;</span>
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

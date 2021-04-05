@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>UserDao.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">daos</a> &gt; <span class="el_source">UserDao.java</span></div><h1>UserDao.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package daos;
+
+import business.User;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ *
+ * @author Leigh Briody
+ */
+public class UserDao extends Dao implements UserDaoInterface {
+
+    public static void main(String[] args) {
+<span class="nc" id="L21">        UserDao uDao = new UserDao(&quot;librarydb&quot;);</span>
+
+<span class="nc" id="L23">        User userByUsername = uDao.getUserByUsername(&quot;andy&quot;);</span>
+<span class="nc" id="L24">        System.out.println(userByUsername.toString());</span>
+
+<span class="nc" id="L26">        int rows = uDao.signUpUser(&quot;username&quot;, &quot;osama@email&quot;, &quot;password&quot;, &quot;osama&quot;, &quot;kheireddine&quot;, 1000);</span>
+<span class="nc" id="L27">        System.out.println(rows);</span>
+
+<span class="nc" id="L29">        User u = new User();</span>
+<span class="nc" id="L30">        String firstName = &quot;Osama&quot;;</span>
+<span class="nc" id="L31">        String lastName = &quot;Kherieddine&quot;;</span>
+<span class="nc" id="L32">        String username = &quot;Big&quot;;</span>
+<span class="nc" id="L33">        String password = &quot;password&quot;;</span>
+<span class="nc" id="L34">        String email = &quot;email@emiaol.com&quot;;</span>
+<span class="nc" id="L35">        u.setUsername(username);</span>
+<span class="nc" id="L36">        u.setPassword(password);</span>
+<span class="nc" id="L37">        u.setFirstName(firstName);</span>
+<span class="nc" id="L38">        u.setLastName(lastName);</span>
+<span class="nc" id="L39">        u.setEmail(email);</span>
+//        u.setPaymentDetailsId(paymentDetailsId);
+<span class="nc" id="L41">        uDao.signUpUser(u.getUsername(), u.getEmail(), u.getPassword(), u.getFirstName(), u.getLastName(), 6);</span>
+        //wasnt allowing to view user details because the user dao was using method get by username and password to get the user , but we dont use this method because of hashing
+
+        //librarydb was spelled wrong in the userdao in the serverlet view details action 
+<span class="nc" id="L45">        System.out.println(uDao.getUserByUsername(&quot;Osamakh&quot;));</span>
+<span class="nc" id="L46">    }</span>
+
+    public UserDao(String databaseName) {
+<span class="nc" id="L49">        super(databaseName);</span>
+<span class="nc" id="L50">    }</span>
+
+    /**
+     * This method is used when a user signs up to the service
+     *
+     * @param username
+     * @param email
+     * @param password
+     * @return the number of rows that the execute has affected. (1)
+     * @author Osama Kheireddine
+     */
+    @Override
+    public int signUpUser(String username, String email, String password, String first_name, String last_name, int cardId) {
+
+<span class="nc" id="L64">        Connection con = null;</span>
+<span class="nc" id="L65">        PreparedStatement ps = null;</span>
+
+<span class="nc" id="L67">        int rowsAffected = 0;</span>
+        try {
+<span class="nc" id="L69">            con = getConnection();</span>
+
+<span class="nc" id="L71">            String query = &quot;INSERT INTO users (username, password, first_name, last_name, email, paymentDetails) VALUES (?, ?, ?, ?, ?, ?)&quot;;</span>
+
+<span class="nc" id="L73">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L74">            ps.setString(1, username);</span>
+<span class="nc" id="L75">            ps.setString(2, password);</span>
+<span class="nc" id="L76">            ps.setString(3, first_name);</span>
+<span class="nc" id="L77">            ps.setString(4, last_name);</span>
+<span class="nc" id="L78">            ps.setString(5, email);</span>
+<span class="nc" id="L79">            ps.setInt(6, cardId);</span>
+
+<span class="nc" id="L81">            rowsAffected = ps.executeUpdate();</span>
+<span class="nc" id="L82">        } catch (SQLException e) {</span>
+<span class="nc" id="L83">            System.out.println(&quot;Exception occured in the signUpUser() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L85">            try {</span>
+<span class="nc bnc" id="L86" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L87">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L89" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L90">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L92">            } catch (SQLException e) {</span>
+<span class="nc" id="L93">                System.out.println(&quot;Exception occured in the finally section of the signUpUser() method&quot;);</span>
+<span class="nc" id="L94">                e.getMessage();</span>
+<span class="nc" id="L95">            }</span>
+<span class="nc" id="L96">        }</span>
+
+<span class="nc" id="L98">        return rowsAffected;</span>
+    }
+
+    /**
+     * This method will be used mainly to allow the user's security answers to
+     * be added to the db
+     *
+     * @param username
+     * @return the user's id
+     */
+    @Override
+    public int getUserId(String username) {
+<span class="nc" id="L110">        Connection con = null;</span>
+<span class="nc" id="L111">        PreparedStatement ps = null;</span>
+<span class="nc" id="L112">        ResultSet rs = null;</span>
+<span class="nc" id="L113">        int userId = -1;</span>
+
+        try {
+<span class="nc" id="L116">            con = getConnection();</span>
+
+<span class="nc" id="L118">            String query = &quot;SELECT id FROM users WHERE username = ?&quot;;</span>
+<span class="nc" id="L119">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L120">            ps.setString(1, username);</span>
+<span class="nc" id="L121">            rs = ps.executeQuery();</span>
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L124">                userId = rs.getInt(&quot;id&quot;);</span>
+            }
+<span class="nc" id="L126">        } catch (SQLException e) {</span>
+<span class="nc" id="L127">            System.out.println(&quot;Exception occured in the getCustomerById() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L129">            try {</span>
+<span class="nc bnc" id="L130" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L131">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L133" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L134">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L136" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L137">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L139">            } catch (SQLException e) {</span>
+<span class="nc" id="L140">                System.out.println(&quot;Exception occured in the finally section of the getCustomerById() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L141">            }</span>
+<span class="nc" id="L142">        }</span>
+<span class="nc" id="L143">        return userId;</span>
+    }
+
+    /**
+     * This method retrieves the user from the db based on the username supplied
+     *
+     * @param username
+     * @return User based off of supplied username
+     */
+    @Override
+    public User getUserByUsername(String username) {
+<span class="nc" id="L154">        Connection conn = null;</span>
+<span class="nc" id="L155">        PreparedStatement ps = null;</span>
+<span class="nc" id="L156">        ResultSet rs = null;</span>
+<span class="nc" id="L157">        User u = null;</span>
+
+        try {
+<span class="nc" id="L160">            conn = getConnection();</span>
+
+<span class="nc" id="L162">            String query = &quot;SELECT * FROM users WHERE username = ?&quot;;</span>
+<span class="nc" id="L163">            ps = conn.prepareStatement(query);</span>
+<span class="nc" id="L164">            ps.setString(1, username);</span>
+<span class="nc" id="L165">            rs = ps.executeQuery();</span>
+
+<span class="nc bnc" id="L167" title="All 2 branches missed.">            if (rs.next()) {</span>
+
+<span class="nc" id="L169">                u = new User();</span>
+<span class="nc" id="L170">                u.setUserId(rs.getInt(&quot;id&quot;));</span>
+<span class="nc" id="L171">                u.setPaymentDetailsId(rs.getInt(&quot;paymentDetails&quot;));</span>
+<span class="nc" id="L172">                u.setFirstName(rs.getString(&quot;first_name&quot;));</span>
+<span class="nc" id="L173">                u.setLastName(rs.getString(&quot;last_name&quot;));</span>
+<span class="nc" id="L174">                u.setEmail(rs.getString(&quot;email&quot;));</span>
+<span class="nc" id="L175">                u.setUsername(rs.getString(&quot;username&quot;));</span>
+<span class="nc" id="L176">                u.setPassword(rs.getString(&quot;password&quot;));</span>
+<span class="nc" id="L177">                u.setPhone(rs.getString(&quot;phone&quot;));</span>
+<span class="nc" id="L178">                u.setAccessId(rs.getString(&quot;access&quot;));</span>
+<span class="nc" id="L179">                u.setUserTypeId(rs.getString(&quot;user_type&quot;));</span>
+<span class="nc" id="L180">                u.setAddressId(rs.getInt(&quot;address&quot;));</span>
+
+            }
+<span class="nc" id="L183">        } catch (SQLException ex) {</span>
+<span class="nc" id="L184">            System.out.println(&quot;A problem occurred while attempting to select a specific user in the getUserByUsername() method&quot;);</span>
+<span class="nc" id="L185">            System.out.println(&quot;Error: &quot; + ex.getMessage());</span>
+        } finally {
+<span class="nc bnc" id="L187" title="All 6 branches missed.">            if (rs != null) {</span>
+                try {
+<span class="nc" id="L189">                    rs.close();</span>
+<span class="nc" id="L190">                } catch (SQLException ex) {</span>
+<span class="nc" id="L191">                    System.out.println(&quot;A problem occurred while attempting to close the resultset in the getUserByUsername() method&quot;);</span>
+<span class="nc" id="L192">                    System.out.println(&quot;Error: &quot; + ex.getMessage());</span>
+<span class="nc" id="L193">                }</span>
+            }
+<span class="nc bnc" id="L195" title="All 6 branches missed.">            if (ps != null) {</span>
+                try {
+<span class="nc" id="L197">                    ps.close();</span>
+<span class="nc" id="L198">                } catch (SQLException ex) {</span>
+<span class="nc" id="L199">                    System.out.println(&quot;A problem occurred while attempting to close the prepared statement in the getUserByUsername() method&quot;);</span>
+<span class="nc" id="L200">                    System.out.println(&quot;Error: &quot; + ex.getMessage());</span>
+<span class="nc" id="L201">                }</span>
+            }
+<span class="nc bnc" id="L203" title="All 6 branches missed.">            if (conn != null) {</span>
+<span class="nc" id="L204">                freeConnection(conn);</span>
+            }
+        }
+
+        // May be null 
+        // if no User matching supplied username and password is found
+<span class="nc" id="L210">        return u;</span>
+    }
+
+    /**
+     * Method will be used to find a specific user based off the username and
+     * password supplied in the parameters
+     *
+     * @param username
+     * @param password
+     * @return A user with the given username and password
+     */
+    @Override
+    public User getUserByUsernamePassword(String username, String password) {
+<span class="nc" id="L223">        Connection conn = null;</span>
+<span class="nc" id="L224">        PreparedStatement ps = null;</span>
+<span class="nc" id="L225">        ResultSet rs = null;</span>
+<span class="nc" id="L226">        User u = null;</span>
+
+        try {
+<span class="nc" id="L229">            conn = getConnection();</span>
+
+<span class="nc" id="L231">            String query = &quot;SELECT * FROM users WHERE username = ? AND password = ?&quot;;</span>
+<span class="nc" id="L232">            ps = conn.prepareStatement(query);</span>
+<span class="nc" id="L233">            ps.setString(1, username);</span>
+<span class="nc" id="L234">            ps.setString(2, password);</span>
+<span class="nc" id="L235">            rs = ps.executeQuery();</span>
+
+<span class="nc bnc" id="L237" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L238">                u = new User();</span>
+<span class="nc" id="L239">                u.setUserId(rs.getInt(&quot;id&quot;));</span>
+<span class="nc" id="L240">                u.setPaymentDetailsId(rs.getInt(&quot;paymentDetails&quot;));</span>
+<span class="nc" id="L241">                u.setFirstName(rs.getString(&quot;first_name&quot;));</span>
+<span class="nc" id="L242">                u.setLastName(rs.getString(&quot;last_name&quot;));</span>
+<span class="nc" id="L243">                u.setEmail(rs.getString(&quot;email&quot;));</span>
+<span class="nc" id="L244">                u.setUsername(rs.getString(&quot;username&quot;));</span>
+<span class="nc" id="L245">                u.setPassword(rs.getString(&quot;password&quot;));</span>
+<span class="nc" id="L246">                u.setPhone(rs.getString(&quot;phone&quot;));</span>
+<span class="nc" id="L247">                u.setAccessId(rs.getString(&quot;access&quot;));</span>
+<span class="nc" id="L248">                u.setUserTypeId(rs.getString(&quot;user_type&quot;));</span>
+<span class="nc" id="L249">                u.setAddressId(rs.getInt(&quot;address&quot;));</span>
+            }
+<span class="nc" id="L251">        } catch (SQLException ex) {</span>
+<span class="nc" id="L252">            System.out.println(&quot;A problem occurred while attempting to select a specific user in the getUserByUsernamePassword() method&quot;);</span>
+<span class="nc" id="L253">            System.out.println(&quot;Error: &quot; + ex.getMessage());</span>
+        } finally {
+<span class="nc bnc" id="L255" title="All 6 branches missed.">            if (rs != null) {</span>
+                try {
+<span class="nc" id="L257">                    rs.close();</span>
+<span class="nc" id="L258">                } catch (SQLException ex) {</span>
+<span class="nc" id="L259">                    System.out.println(&quot;A problem occurred while attempting to close the resultset in the getUserByUsernamePassword() method&quot;);</span>
+<span class="nc" id="L260">                    System.out.println(&quot;Error: &quot; + ex.getMessage());</span>
+<span class="nc" id="L261">                }</span>
+            }
+<span class="nc bnc" id="L263" title="All 6 branches missed.">            if (ps != null) {</span>
+                try {
+<span class="nc" id="L265">                    ps.close();</span>
+<span class="nc" id="L266">                } catch (SQLException ex) {</span>
+<span class="nc" id="L267">                    System.out.println(&quot;A problem occurred while attempting to close the prepared statement in the getUserByUsernamePassword() method&quot;);</span>
+<span class="nc" id="L268">                    System.out.println(&quot;Error: &quot; + ex.getMessage());</span>
+<span class="nc" id="L269">                }</span>
+            }
+<span class="nc bnc" id="L271" title="All 6 branches missed.">            if (conn != null) {</span>
+<span class="nc" id="L272">                freeConnection(conn);</span>
+            }
+        }
+
+        // May be null 
+        // if no User matching supplied username and password is found
+<span class="nc" id="L278">        return u;</span>
+    }
+
+    /**
+     * This method will change user details supplied. Validation must be done
+     * before using this method
+     *
+     * @param userId
+     * @param fName
+     * @param lName
+     * @param email
+     * @param phone
+     * @return A true/false on if the user's details have been updated
+     */
+    @Override
+    public boolean editUserDetails(int userId, String fName, String lName, String email, String phone) {
+<span class="nc" id="L294">        Connection conn = null;</span>
+<span class="nc" id="L295">        PreparedStatement ps = null;</span>
+        //set to false
+<span class="nc" id="L297">        boolean successfulUpdate = false;</span>
+<span class="nc" id="L298">        int rowsAffected = 0;</span>
+
+        try {
+<span class="nc" id="L301">            conn = getConnection();</span>
+
+<span class="nc" id="L303">            String query = &quot;UPDATE users SET first_name = ?, last_name = ?, email = ?, phone = ? WHERE id = ?&quot;;</span>
+<span class="nc" id="L304">            ps = conn.prepareStatement(query);</span>
+<span class="nc" id="L305">            ps.setString(1, fName);</span>
+<span class="nc" id="L306">            ps.setString(2, lName);</span>
+<span class="nc" id="L307">            ps.setString(3, email);</span>
+<span class="nc" id="L308">            ps.setString(4, phone);</span>
+<span class="nc" id="L309">            ps.setInt(5, userId);</span>
+<span class="nc" id="L310">            rowsAffected = ps.executeUpdate();</span>
+
+<span class="nc bnc" id="L312" title="All 2 branches missed.">            if (rowsAffected == 1) {</span>
+<span class="nc" id="L313">                successfulUpdate = true;</span>
+            }
+<span class="nc" id="L315">        } catch (SQLException ex) {</span>
+<span class="nc" id="L316">            System.out.println(&quot;A problem occurred while attempting to edit a specific user in the editUserDetails() method&quot;);</span>
+<span class="nc" id="L317">            System.out.println(&quot;Error: &quot; + ex.getMessage());</span>
+        } finally {
+<span class="nc bnc" id="L319" title="All 6 branches missed.">            if (ps != null) {</span>
+                try {
+<span class="nc" id="L321">                    ps.close();</span>
+<span class="nc" id="L322">                } catch (SQLException ex) {</span>
+<span class="nc" id="L323">                    System.out.println(&quot;A problem occurred while attempting to close the prepared statement in the editUserDetails() method&quot;);</span>
+<span class="nc" id="L324">                    System.out.println(&quot;Error: &quot; + ex.getMessage());</span>
+<span class="nc" id="L325">                }</span>
+            }
+<span class="nc bnc" id="L327" title="All 6 branches missed.">            if (conn != null) {</span>
+<span class="nc" id="L328">                freeConnection(conn);</span>
+            }
+        }
+
+        // May be false (if it doesn't work)
+<span class="nc" id="L333">        return successfulUpdate;</span>
+    }
+
+    /**
+     * This method will allow an admin to disable another member.
+     *
+     * @param username
+     * @return
+     */
+//    @Override
+//
+//    public boolean disableUser(String username) {
+//        Connection con = null;
+//        PreparedStatement ps = null;
+//        ResultSet rs = null;
+//        int rowsAffected = 0;
+//        boolean output = false;
+//        try {
+//            con = getConnection();
+//
+//            String query = &quot;UPDATE users SET access = 2 WHERE username = ? AND user_type = 1&quot;;
+//            ps = con.prepareStatement(query);
+//            ps.setString(1, username);
+//            //as it is an update
+//            ps.executeUpdate();
+//
+//            if (rowsAffected &gt; 0) {
+//                output = true;
+//            }
+//
+//        } catch (SQLException e) {
+//            System.out.println(&quot;Exception occured in the disableUser() method: &quot; + e.getMessage());
+//        } finally {
+//            try {
+//                if (rs != null) {
+//                    rs.close();
+//                }
+//                if (ps != null) {
+//                    ps.close();
+//                }
+//                if (con != null) {
+//                    freeConnection(con);
+//                }
+//            } catch (SQLException e) {
+//                System.out.println(&quot;Exception occured in the finally section of the disableUser() method: &quot; + e.getMessage());
+//            }
+//        }
+//
+//        return output;
+//    }
+    /**
+     * This method will check if a username passed as a string already exists.
+     *
+     * @param username
+     * @return
+     */
+//    @Override
+//
+//    public boolean checkIfUsernameExists(String username) {
+//
+//        Connection con = null;
+//        PreparedStatement ps = null;
+//        ResultSet rs = null;
+//
+//        boolean ifUsernameExists = false;
+//
+//        try {
+//            con = getConnection();
+//
+//            String query = &quot;Select * from users where username = ?&quot;;
+//            ps = con.prepareStatement(query);
+//            ps.setString(1, username);
+//            rs = ps.executeQuery();
+//
+//            if (rs.next()) {
+//                //it means the username returned something therfore a user with that username exists
+//                ifUsernameExists = true;
+//            } else {
+//                ifUsernameExists = false;
+//
+//            }
+//        } catch (SQLException e) {
+//            System.out.println(&quot;Exception occured in the getAllProducts() method: &quot; + e.getMessage());
+//        } finally {
+//            try {
+//                if (rs != null) {
+//                    rs.close();
+//                }
+//                if (ps != null) {
+//                    ps.close();
+//                }
+//                if (con != null) {
+//                    freeConnection(con);
+//                }
+//            } catch (SQLException e) {
+//                System.out.println(&quot;Exception occured in the finally section of the getAllProducts() method: &quot; + e.getMessage());
+//            }
+//        }
+//
+//        return ifUsernameExists;
+//
+//    }
+    /**
+     * This method will allow the user to login to the library Returns true if
+     * login success and false otherwise
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+//    @Override
+//    public boolean loginToLibrary(String username, String password) {
+//
+//        Connection conn = null;
+//        PreparedStatement ps = null;
+//        ResultSet rs = null;
+//        boolean loginSuccess = false;
+//
+//        User u = null; //only returning one record so no list is needed
+//
+//        try {
+//            conn = getConnection();
+//
+//            String query = &quot;Select * from Users WHERE username =? AND password = ? AND access = 1&quot;;
+//            ps = conn.prepareStatement(query);
+//            ps.setString(1, username);
+//            ps.setString(2, password);
+//            rs = ps.executeQuery();
+//
+//            if (rs.next()) // While not need as you are just searching for one record and returning it once found
+//            {
+//                loginSuccess = true;
+//            }
+//        } catch (SQLException ex) {
+//            System.out.println(&quot;Exception occured in the loginToLibrary() method: &quot; + ex.getMessage());
+//        } finally {
+//            try {
+//                if (rs != null) {
+//                    rs.close();
+//                }
+//                if (conn != null) {
+//                    ps.close();
+//                }
+//                if (conn != null) {
+//                    freeConnection(conn);
+//                }
+//
+//            } catch (SQLException e) {
+//                System.out.println(&quot;Exception occured the the finally section of the loginToLibrary() method: &quot; + e.getMessage());
+//            }
+//        }
+//        return loginSuccess;
+//    }
+    /**
+     * This method will get the current user that is logged in , it will get
+     * their username and password and return all their details as a user object
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+//    public User getUserLoggedIn(String username, String password) {
+//        Connection con = null;
+//        PreparedStatement ps = null;
+//        ResultSet rs = null;
+//        User userFound = new User();
+//
+//        //String firstName , String lastName , String email , String username , String password , String phone , int accessId , int userTypeId , int addressId
+//        int rowsAffected = 0;
+//
+//        boolean ifUserWasRegistered = false;
+//
+//        try {
+//            con = getConnection();
+//
+//            String query = &quot;select * from users where username = ? and password = ?&quot;;
+//            ps = con.prepareStatement(query);
+//            ps.setString(1, username);
+//            ps.setString(2, password);
+//            rs = ps.executeQuery();
+//
+//            while (rs.next()) {
+//
+//                int userId = rs.getInt(&quot;user_id&quot;);
+//                String firstName = rs.getString(&quot;first_name&quot;);
+//                String lastName = rs.getString(&quot;last_name&quot;);
+//                String email = rs.getString(&quot;email&quot;);
+//                String pass = rs.getString(&quot;password&quot;);
+//                String phone = rs.getString(&quot;phone&quot;);
+//                int access = rs.getInt((&quot;access&quot;));
+//                int userType = rs.getInt(&quot;user_type&quot;);
+//                int address = rs.getInt(&quot;address&quot;);
+//                String user = rs.getString(&quot;username&quot;);
+//
+//                //String firstName , String lastName , String email , String username , String password , String phone , int accessId , int userTypeId , int addressId
+//                userFound = new User(userId, firstName, lastName, email, username, password, phone, access, userType, address);
+//
+//            }
+//        } catch (SQLException e) {
+//            System.out.println(&quot;Exception occured in the getUserLoggedIn() method: &quot; + e.getMessage());
+//        } finally {
+//            try {
+//                if (rs != null) {
+//                    rs.close();
+//                }
+//                if (ps != null) {
+//                    ps.close();
+//                }
+//                if (con != null) {
+//                    freeConnection(con);
+//                }
+//            } catch (SQLException e) {
+//                System.out.println(&quot;Exception occured in the finally section of the getUserLoggedIn() method: &quot; + e.getMessage());
+//            }
+//        }
+//
+//        return userFound;
+//    }
+    //make get user type menu
+    /**
+     * This method will check if the username passed is an admin or member user
+     * True if admin and false otherwise
+     *
+     * @param username
+     * @return
+     */
+//    @Override
+//    public boolean isUserAdmin(String username) {
+//
+//        Connection con = null;
+//        PreparedStatement ps = null;
+//        ResultSet rs = null;
+//        boolean userIsAdmin = false;
+//        try {
+//            con = getConnection();
+//
+//            String query = &quot;SELECT * from users where username = ? and user_type = 2&quot;;
+//            ps = con.prepareStatement(query);
+//            ps.setString(1, username);
+//            rs = ps.executeQuery();
+//
+//            if (rs.next()) {
+//                userIsAdmin = true;
+//            }
+//        } catch (SQLException e) {
+//            System.out.println(&quot;Exception occured in the getUserType() method: &quot; + e.getMessage());
+//        } finally {
+//            try {
+//                if (rs != null) {
+//                    rs.close();
+//                }
+//                if (ps != null) {
+//                    ps.close();
+//                }
+//                if (con != null) {
+//                    freeConnection(con);
+//                }
+//            } catch (SQLException e) {
+//                System.out.println(&quot;Exception occured in the finally section of the getUserType() method: &quot; + e.getMessage());
+//            }
+//        }
+//        return userIsAdmin;
+//    }
+    /**
+     * This method is to return all the usernames so that they can be displayed.
+     *
+     * @return
+     */
+//    @Override
+//    public ArrayList&lt;User&gt; displayUsernames() {
+//        Connection con = null;
+//        PreparedStatement ps = null;
+//        ResultSet rs = null;
+//        ArrayList&lt;User&gt; userList = new ArrayList();
+//
+//        try {
+//            con = getConnection();
+//
+//            String query = &quot;SELECT * FROM users&quot;;
+//            ps = con.prepareStatement(query);
+//            rs = ps.executeQuery();
+//
+//            while (rs.next()) {
+//
+//                //Get all the data fields
+//                int userId = rs.getInt(&quot;user_id&quot;);
+//                String fName = rs.getString(&quot;first_name&quot;);
+//                String lName = rs.getString(&quot;last_name&quot;);
+//                String email = rs.getString(&quot;email&quot;);
+//                String password = rs.getString(&quot;password&quot;);
+//                String phone = rs.getString(&quot;phone&quot;);
+//                int accessId = rs.getInt(&quot;access&quot;);
+//                int userTypeId = rs.getInt(&quot;user_type&quot;);
+//                int addressId = rs.getInt(&quot;address&quot;);
+//                String userName = rs.getString(&quot;username&quot;);
+//
+//                //create the object
+//                User user = new User(userId, fName, lName, email, userName, password, phone, accessId, userTypeId, addressId);
+//                //Add it to the array list.
+//                userList.add(user);
+//            }
+//        } catch (SQLException e) {
+//            System.out.println(&quot;Exception occured in the displayUsernames() method: &quot; + e.getMessage());
+//        } finally {
+//            try {
+//                if (rs != null) {
+//                    rs.close();
+//                }
+//                if (ps != null) {
+//                    ps.close();
+//                }
+//                if (con != null) {
+//                    freeConnection(con);
+//                }
+//            } catch (SQLException e) {
+//                System.out.println(&quot;Exception occured in the finally section of the displayUsernames() method: &quot; + e.getMessage());
+//            }
+//        }
+//
+//        return userList;
+//
+//    }
+    @Override
+    public boolean logout() {
+
+<span class="nc" id="L658">        throw new UnsupportedOperationException(&quot;Not supported yet.&quot;); //To change body of generated methods, choose Tools | Templates.   </span>
+
+    }
+
+//    public boolean addAddress(String address_line_1, String address_line2, String county, String city, String country) {
+//
+//        throw new UnsupportedOperationException(&quot;Not supported yet.&quot;); //To change body of generated methods, choose Tools | Templates.   
+//    }
+    @Override
+    public int signUpUser(User u) {
+<span class="nc" id="L668">        throw new UnsupportedOperationException(&quot;Not supported yet.&quot;); //To change body of generated methods, choose Tools | Templates.</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

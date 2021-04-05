@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>CardsDao.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">daos</a> &gt; <span class="el_source">CardsDao.java</span></div><h1>CardsDao.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package daos;
+
+import daos.CardsDaoInterface;
+import daos.Dao;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ *
+ * @author Leigh Briody
+ */
+public class CardsDao extends Dao implements CardsDaoInterface {
+
+    public static void main(String[] args) {
+
+<span class="nc" id="L23">    }</span>
+
+    /**
+     * This constructor will super the database name to the super classs dao making a connection to the database.
+     * @param databaseName 
+     */
+    public CardsDao(String databaseName) {
+<span class="nc" id="L30">        super(databaseName);</span>
+<span class="nc" id="L31">    }</span>
+
+    /**
+     * This method will insert the payment details provided into the database.
+     * @param cardNumber
+     * @param exDate
+     * @param cvv
+     * @return 
+     */
+    @Override
+    public int insertPaymentDetails(String cardNumber, String exDate, String cvv) {
+
+<span class="nc" id="L43">        Connection con = null;</span>
+<span class="nc" id="L44">        PreparedStatement ps = null;</span>
+
+<span class="nc" id="L46">        int rowsAffected = 0;</span>
+        try {
+<span class="nc" id="L48">            con = getConnection();</span>
+
+<span class="nc" id="L50">            String query = &quot;INSERT INTO cards (id , cardNum, expiry, cvv) VALUES (null , ? , ?, ?)&quot;;</span>
+
+<span class="nc" id="L52">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L53">            ps.setString(1, cardNumber);</span>
+<span class="nc" id="L54">            ps.setString(2, exDate);</span>
+<span class="nc" id="L55">            ps.setString(3, cvv);</span>
+
+<span class="nc" id="L57">            rowsAffected = ps.executeUpdate();</span>
+<span class="nc" id="L58">        } catch (SQLException e) {</span>
+<span class="nc" id="L59">            System.out.println(&quot;Exception occured in the insertPaymentDetails() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L61">            try {</span>
+<span class="nc bnc" id="L62" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L63">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L65" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L66">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L68">            } catch (SQLException e) {</span>
+<span class="nc" id="L69">                System.out.println(&quot;Exception occured in the finally section of the signUpUser() method&quot;);</span>
+<span class="nc" id="L70">                e.getMessage();</span>
+<span class="nc" id="L71">            }</span>
+<span class="nc" id="L72">        }</span>
+
+<span class="nc" id="L74">        return rowsAffected;</span>
+    }
+
+    /**
+     * This method will get the most recent id in the cards table
+     *
+     * @return
+     */
+    @Override
+    public int getCardsRecentId() {
+<span class="nc" id="L84">        Connection con = null;</span>
+<span class="nc" id="L85">        PreparedStatement ps = null;</span>
+<span class="nc" id="L86">        ResultSet rs = null;</span>
+<span class="nc" id="L87">        int cardId = -1;</span>
+
+        try {
+<span class="nc" id="L90">            con = getConnection();</span>
+
+<span class="nc" id="L92">            String query = &quot;SELECT max(id) from cards&quot;;</span>
+<span class="nc" id="L93">            ps = con.prepareStatement(query);</span>
+<span class="nc" id="L94">            rs = ps.executeQuery();</span>
+
+<span class="nc bnc" id="L96" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L97">                cardId = rs.getInt(&quot;max(id)&quot;);</span>
+            }
+<span class="nc" id="L99">        } catch (SQLException e) {</span>
+<span class="nc" id="L100">            System.out.println(&quot;Exception occured in the getMaxCardId() method: &quot; + e.getMessage());</span>
+        } finally {
+<span class="nc" id="L102">            try {</span>
+<span class="nc bnc" id="L103" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L104">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L106" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L107">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L109" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L110">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L112">            } catch (SQLException e) {</span>
+<span class="nc" id="L113">                System.out.println(&quot;Exception occured in the finally section of the getCustomerById() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L114">            }</span>
+<span class="nc" id="L115">        }</span>
+<span class="nc" id="L116">        return cardId;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

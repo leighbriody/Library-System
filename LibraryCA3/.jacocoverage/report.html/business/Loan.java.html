@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Loan.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">business</a> &gt; <span class="el_source">Loan.java</span></div><h1>Loan.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package business;
+
+
+public class Loan {
+    /*
+     CREATE TABLE `loans` (
+     `loan_id` int(7) NOT NULL,
+     `book_id` int(11) DEFAULT NULL,
+     `user_id` int(11) DEFAULT NULL,
+     `date_taken` date DEFAULT NULL,
+     `due_date` date DEFAULT NULL,
+     `date_returned` date DEFAULT NULL
+     ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+     */
+    
+    //fields 
+    private int loanId;
+    private int bookId;
+    private int userId;
+    private String dateTaken;
+    private String dueDate;
+    private String dateReturned;
+    
+    //Constructors
+<span class="nc" id="L30">    public Loan(){</span>
+        
+<span class="nc" id="L32">    }</span>
+    
+<span class="nc" id="L34">    public Loan(int loanId , int bookId , int userId , String dateTaken , String dueDate , String dateReturned){</span>
+<span class="nc" id="L35">        this.loanId = loanId;</span>
+<span class="nc" id="L36">        this.bookId = bookId;</span>
+<span class="nc" id="L37">        this.userId = userId;</span>
+<span class="nc" id="L38">        this.dateTaken = dateTaken;</span>
+<span class="nc" id="L39">        this.dueDate = dueDate;</span>
+<span class="nc" id="L40">        this.dateReturned = dateReturned;</span>
+<span class="nc" id="L41">    }</span>
+    
+    //Getters and setters
+
+    public int getLoanId() {
+<span class="nc" id="L46">        return loanId;</span>
+    }
+
+    public void setLoanId(int loanId) {
+<span class="nc" id="L50">        this.loanId = loanId;</span>
+<span class="nc" id="L51">    }</span>
+
+    public int getBookId() {
+<span class="nc" id="L54">        return bookId;</span>
+    }
+
+    public void setBookId(int bookId) {
+<span class="nc" id="L58">        this.bookId = bookId;</span>
+<span class="nc" id="L59">    }</span>
+
+    public int getUserId() {
+<span class="nc" id="L62">        return userId;</span>
+    }
+
+    public void setUserId(int userId) {
+<span class="nc" id="L66">        this.userId = userId;</span>
+<span class="nc" id="L67">    }</span>
+
+    public String getDateTaken() {
+<span class="nc" id="L70">        return dateTaken;</span>
+    }
+
+    public void setDateTaken(String dateTaken) {
+<span class="nc" id="L74">        this.dateTaken = dateTaken;</span>
+<span class="nc" id="L75">    }</span>
+
+    public String getDueDate() {
+<span class="nc" id="L78">        return dueDate;</span>
+    }
+
+    public void setDueDate(String dueDate) {
+<span class="nc" id="L82">        this.dueDate = dueDate;</span>
+<span class="nc" id="L83">    }</span>
+
+    public String getDateReturned() {
+<span class="nc" id="L86">        return dateReturned;</span>
+    }
+
+    public void setDateReturned(String dateReturned) {
+<span class="nc" id="L90">        this.dateReturned = dateReturned;</span>
+<span class="nc" id="L91">    }</span>
+    
+    //To String
+
+    @Override
+    public String toString() {
+<span class="nc" id="L97">        return &quot;Loans{&quot; + &quot;loanId=&quot; + loanId + &quot;, bookId=&quot; + bookId + &quot;, userId=&quot; + userId + &quot;, dateTaken=&quot; + dateTaken + &quot;, dueDate=&quot; + dueDate + &quot;, dateReturned=&quot; + dateReturned + '}';</span>
+    }
+    
+    //Hash and equals
+    //equal by loan id
+    @Override
+    public int hashCode() {
+<span class="nc" id="L104">        int hash = 7;</span>
+<span class="nc" id="L105">        hash = 23 * hash + this.loanId;</span>
+<span class="nc" id="L106">        return hash;</span>
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (obj == null) {</span>
+<span class="nc" id="L112">            return false;</span>
+        }
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if (getClass() != obj.getClass()) {</span>
+<span class="nc" id="L115">            return false;</span>
+        }
+<span class="nc" id="L117">        final Loan other = (Loan) obj;</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (this.loanId != other.loanId) {</span>
+<span class="nc" id="L119">            return false;</span>
+        }
+<span class="nc" id="L121">        return true;</span>
+    }
+    
+    //format
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

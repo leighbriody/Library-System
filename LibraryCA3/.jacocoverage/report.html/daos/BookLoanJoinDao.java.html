@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>BookLoanJoinDao.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">daos</a> &gt; <span class="el_source">BookLoanJoinDao.java</span></div><h1>BookLoanJoinDao.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package daos;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+/**
+ *
+ * @author Leigh Briody
+ */
+public class BookLoanJoinDao extends Dao implements BookLoanJoinInterface {
+
+    public BookLoanJoinDao(String databaseName) {
+<span class="nc" id="L22">        super(databaseName);</span>
+<span class="nc" id="L23">    }</span>
+
+    @Override
+    /**
+     * This method will check if a user already has a book on loan
+     */
+    public boolean doesUserHaveBookOnLoan(int bookId, int userId) {
+        //create a connection object
+<span class="nc" id="L31">        Connection con = null;</span>
+        //Create a prepared statement object
+<span class="nc" id="L33">        PreparedStatement ps = null;</span>
+        //Create a result set object
+<span class="nc" id="L35">        ResultSet rs = null;</span>
+        //create a boolean that will alert if a result has been found
+<span class="nc" id="L37">        boolean output = false;</span>
+
+        //we now need to try to execute a query &amp; use the parameter that is passed through this method
+        try {
+            //getConnection()
+<span class="nc" id="L42">            con = getConnection();</span>
+            //query to ask db
+<span class="nc" id="L44">            String query = &quot;SELECT * FROM loans WHERE user_id = ? AND book_id = ? AND date_returned is null&quot;;</span>
+            //prepare the statement
+<span class="nc" id="L46">            ps = con.prepareStatement(query);</span>
+            //bind the parameter to the value were looking for
+<span class="nc" id="L48">            ps.setInt(1, userId);</span>
+<span class="nc" id="L49">            ps.setInt(2, bookId);</span>
+            //execute the query
+<span class="nc" id="L51">            rs = ps.executeQuery();</span>
+
+            //while loop to add the results to the arraylist
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            while (rs.next()) {</span>
+                //if the resultSet has a result, there will be a true flag
+<span class="nc" id="L56">                output = true;</span>
+            }
+            //catch statement in case of error
+<span class="nc" id="L59">        } catch (SQLException e) {</span>
+<span class="nc" id="L60">            System.out.println(&quot;Exception occured in doesUserHaveBookOnLoan() method: &quot; + e.getMessage());</span>
+        } //finally block to close the connection
+        finally {
+<span class="nc" id="L63">            try {</span>
+<span class="nc bnc" id="L64" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L65">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L67" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L68">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L70" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L71">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L73">            } catch (SQLException e) {</span>
+<span class="nc" id="L74">                System.out.println(&quot;Exception occured in the finally section of the doesUserHaveBookOnLoan() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L75">            }</span>
+<span class="nc" id="L76">        }</span>
+
+<span class="nc" id="L78">        return output;</span>
+    }
+
+    /**
+     *This method will allow the user to return a book they have on loan
+     * @param bookId
+     * @param userId
+     * @return
+     */
+    @Override
+    
+    public boolean returnBookOnLoan(int bookId, int userId) {
+        //create a connection object
+<span class="nc" id="L91">        Connection con = null;</span>
+        //Create a prepared statement object
+<span class="nc" id="L93">        PreparedStatement ps = null;</span>
+        //Create a result set object
+<span class="nc" id="L95">        ResultSet rs = null;</span>
+        //create a boolean that will alert if a result has been found
+<span class="nc" id="L97">        boolean output = false;</span>
+        //Timestamp object
+        
+<span class="nc" id="L100">        Calendar c = Calendar.getInstance();</span>
+<span class="nc" id="L101">        SimpleDateFormat format1 = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;);</span>
+<span class="nc" id="L102">        String formattedCurrentTime = format1.format(c.getTime());</span>
+        
+<span class="nc" id="L104">        int rowsAffected = 0;</span>
+
+        //we now need to try to execute a query &amp; use the parameter that is passed through this method
+        try {
+            //getConnection()
+<span class="nc" id="L109">            con = getConnection();</span>
+            //query to ask db
+            //update date_returned where the loan has this userId and bookId
+<span class="nc" id="L112">            String query = &quot;UPDATE loans SET date_returned = ? WHERE book_id = ? AND user_id = ?&quot;;</span>
+            //prepare the statement
+<span class="nc" id="L114">            ps = con.prepareStatement(query);</span>
+            //bind the parameter to the value were looking for
+<span class="nc" id="L116">            ps.setString(1, formattedCurrentTime);</span>
+<span class="nc" id="L117">            ps.setInt(2, bookId);</span>
+<span class="nc" id="L118">            ps.setInt(3, userId);</span>
+            //execute the query
+<span class="nc" id="L120">             rowsAffected = ps.executeUpdate(); </span>
+
+            //while loop to add the results to the arraylist
+<span class="nc bnc" id="L123" title="All 2 branches missed.">             if(rowsAffected&gt;0){</span>
+                //if the resultSet has a result, there will be a true flag
+<span class="nc" id="L125">                output = true;</span>
+            }
+            //catch statement in case of error
+<span class="nc" id="L128">        } catch (SQLException e) {</span>
+<span class="nc" id="L129">            System.out.println(&quot;Exception occured in returnBookOnLoan() method: &quot; + e.getMessage());</span>
+        } //finally block to close the connection
+        finally {
+<span class="nc" id="L132">            try {</span>
+<span class="nc bnc" id="L133" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L134">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L136" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L137">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L139" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L140">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L142">            } catch (SQLException e) {</span>
+<span class="nc" id="L143">                System.out.println(&quot;Exception occured in the finally section of the returnBookOnLoan() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L144">            }</span>
+<span class="nc" id="L145">        }</span>
+
+<span class="nc" id="L147">        return output;</span>
+    }
+
+    /**
+     *This method will allow the user to borrow a book
+     * @param bookId
+     * @param userId
+     * @return
+     */
+    @Override
+    
+    public boolean borrowBook(int bookId, int userId) {
+        //create a connection object
+<span class="nc" id="L160">        Connection con = null;</span>
+        //Create a prepared statement object
+<span class="nc" id="L162">        PreparedStatement ps = null;</span>
+        //Create a result set object
+<span class="nc" id="L164">        ResultSet rs = null;</span>
+        //a flag to say if there are enough books
+<span class="nc" id="L166">        boolean enoughBooks = false;</span>
+        //create a boolean that will alert if a result has been found
+<span class="nc" id="L168">        boolean output1 = false;</span>
+<span class="nc" id="L169">        boolean output2 = false;</span>
+<span class="nc" id="L170">        boolean output3 = false;</span>
+        
+        
+        //CALANDER OBJECT FOR DATE TAKEN
+<span class="nc" id="L174">        int numberOfDays = 14;</span>
+<span class="nc" id="L175">        Calendar c = Calendar.getInstance();</span>
+<span class="nc" id="L176">        SimpleDateFormat format1 = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;);</span>
+<span class="nc" id="L177">        String formattedCurrentTime = format1.format(c.getTime());</span>
+        
+        
+     
+<span class="nc" id="L181">        c.add(Calendar.DAY_OF_WEEK, 14);</span>
+        
+<span class="nc" id="L183">        String formattedTwoWeeks = format1.format(c.getTime());</span>
+        
+       
+        //Flag to see if rows affected
+<span class="nc" id="L187">        int rowsAffected = 0;</span>
+
+        //we now need to try to execute a query &amp; use the parameter that is passed through this method
+        try {
+            //getConnection()
+<span class="nc" id="L192">            con = getConnection();</span>
+
+            //query to ask db
+            //We need 2 queries, one to see if the db has that book in stock and one to update
+<span class="nc" id="L196">            String query1 = &quot;SELECT quantity FROM books WHERE book_id = ? AND quantity &gt; 0&quot;;</span>
+<span class="nc" id="L197">            ps = con.prepareStatement(query1);</span>
+<span class="nc" id="L198">            ps.setInt(1, bookId);</span>
+<span class="nc" id="L199">            rs = ps.executeQuery();</span>
+            //loop results and see if true
+<span class="nc bnc" id="L201" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L202">                enoughBooks = true;</span>
+            }
+            //only do this if there are enough books
+<span class="nc bnc" id="L205" title="All 2 branches missed.">            if (enoughBooks == true) {</span>
+                //create query to decrement books
+<span class="nc" id="L207">                String queryBookTbl = &quot;UPDATE books SET quantity = quantity -1 WHERE book_id = ?&quot;;</span>
+<span class="nc" id="L208">                ps = con.prepareStatement(queryBookTbl);</span>
+<span class="nc" id="L209">                ps.setInt(1, bookId);</span>
+<span class="nc" id="L210">                rowsAffected = ps.executeUpdate();</span>
+                //if there are any affected rows do this
+<span class="nc bnc" id="L212" title="All 2 branches missed.">                if (rowsAffected &gt; 0) {</span>
+<span class="nc" id="L213">                    output1 = true;</span>
+                    //Create a loan
+<span class="nc" id="L215">                    String query = &quot;INSERT INTO loans (loan_id , book_id, user_id, date_taken, due_date) VALUES (null, ?,?,?,?)&quot;;</span>
+                    //prepare the statement
+<span class="nc" id="L217">                    ps = con.prepareStatement(query);</span>
+                    //bind the parameter to the value were looking for
+<span class="nc" id="L219">                    ps.setInt(1, bookId);</span>
+<span class="nc" id="L220">                    ps.setInt(2, userId);</span>
+<span class="nc" id="L221">                    ps.setString(3, formattedCurrentTime);</span>
+<span class="nc" id="L222">                    ps.setString(4, formattedTwoWeeks);</span>
+<span class="nc" id="L223">                    rowsAffected = ps.executeUpdate();</span>
+                    //check to see if any update happened
+<span class="nc bnc" id="L225" title="All 2 branches missed.">                    if (rowsAffected &gt; 0) {</span>
+<span class="nc" id="L226">                        output2 = true;</span>
+                    }
+                    //Create the final flag
+<span class="nc bnc" id="L229" title="All 4 branches missed.">                    if(output1 == true &amp;&amp; output2 == true){</span>
+<span class="nc" id="L230">                        output3 = true;</span>
+                    }
+                }
+            }
+            //catch statement in case of error
+<span class="nc" id="L235">        } catch (SQLException e) {</span>
+<span class="nc" id="L236">            System.out.println(&quot;Exception occured in borrowBook() method: &quot; + e.getMessage());</span>
+        } //finally block to close the connection
+        finally {
+<span class="nc" id="L239">            try {</span>
+<span class="nc bnc" id="L240" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L241">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L243" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L244">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L246" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L247">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L249">            } catch (SQLException e) {</span>
+<span class="nc" id="L250">                System.out.println(&quot;Exception occured in the finally section of the borrowBook() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L251">            }</span>
+<span class="nc" id="L252">        }</span>
+
+<span class="nc" id="L254">        return output3;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

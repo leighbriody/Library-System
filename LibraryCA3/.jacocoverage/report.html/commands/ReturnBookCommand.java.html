@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ReturnBookCommand.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">commands</a> &gt; <span class="el_source">ReturnBookCommand.java</span></div><h1>ReturnBookCommand.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package commands;
+
+import business.User;
+import daos.BookDao;
+import daos.LoanDao;
+import java.time.LocalDate;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author Osama Kheireddine
+ */
+<span class="nc" id="L20">public class ReturnBookCommand implements Command {</span>
+    
+    /**
+     * Allows the user to return a book based on their selected option in the list
+     * @param request
+     * @param response
+     * @return Returns the user to the appropriate their current loans page and shows what is still left to be returned
+     */
+    @Override
+    public String doAction(HttpServletRequest request, HttpServletResponse response) {
+<span class="nc" id="L30">        String forwardToJsp = &quot;error.jsp&quot;;</span>
+
+        //get the inputs
+        //get the session
+<span class="nc" id="L34">        HttpSession session = request.getSession();</span>
+        //get the user(for getting id)
+<span class="nc" id="L36">        User u = (User) session.getAttribute(&quot;loggedInUser&quot;);</span>
+<span class="nc" id="L37">        int userId = u.getUserId();</span>
+
+        //if the user is logged in...
+<span class="nc bnc" id="L40" title="All 4 branches missed.">        if (u.getUsername() != null &amp;&amp; !u.getUsername().equals(&quot;&quot;)) {</span>
+            //get the fields needed to make a loan.
+            //bookId
+<span class="nc" id="L43">            String bookIdAsStr = request.getParameter(&quot;bookId&quot;);</span>
+            //if the borrow parameters are empty send the user to the borrow book page
+<span class="nc bnc" id="L45" title="All 2 branches missed.">            if (bookIdAsStr == null) {</span>
+<span class="nc" id="L46">                forwardToJsp = &quot;returnBook.jsp&quot;;</span>
+            } else {
+                //convert to int
+<span class="nc" id="L49">                int bookId = Integer.parseInt(bookIdAsStr);</span>
+                //date now..
+<span class="nc" id="L51">                LocalDate date = java.time.LocalDate.now();</span>
+                //now parse them to string
+<span class="nc" id="L53">                String currentDate = date.toString();</span>
+                //get a book &amp; loan dao to interact with db
+<span class="nc" id="L55">                LoanDao lDao = new LoanDao(&quot;librarydb&quot;);</span>
+<span class="nc" id="L56">                BookDao bDao = new BookDao(&quot;librarydb&quot;);</span>
+                //now to return the book
+<span class="nc" id="L58">                boolean bookReturned = lDao.returnBook(currentDate, bookId, userId);</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                if (bookReturned == true) {</span>
+                    //now to increase the qty of the book again
+<span class="nc bnc" id="L61" title="All 2 branches missed.">                    if (bDao.increaseBookQty(bookId, 1) == true) {</span>
+                        //take user back to their current loans
+<span class="nc" id="L63">                        forwardToJsp = &quot;viewCurrentLoans.jsp&quot;;</span>
+                    } else {
+<span class="nc" id="L65">                        String errorMessage = &quot;An error occurred while returning your book... Please &lt;a href='FactoryServlet?action=returnBook'&gt;Try Again&lt;/a&gt;&quot;;</span>
+<span class="nc" id="L66">                        session = request.getSession();</span>
+<span class="nc" id="L67">                        session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+<span class="nc" id="L68">                    }</span>
+                } else {
+<span class="nc" id="L70">                    String errorMessage = &quot;An error occurred while returning your book... Please &lt;a href='FactoryServlet?action=returnBook'&gt;Try Again&lt;/a&gt;&quot;;</span>
+<span class="nc" id="L71">                    session = request.getSession();</span>
+<span class="nc" id="L72">                    session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+                }
+            }
+<span class="nc" id="L75">        } else {</span>
+<span class="nc" id="L76">            String errorMessage = &quot;An error occurred, you have been logged out... Please &lt;a href='FactoryServlet?action=login'&gt;Login&lt;/a&gt;&quot;;</span>
+<span class="nc" id="L77">            session = request.getSession();</span>
+<span class="nc" id="L78">            session.setAttribute(&quot;errorMessage&quot;, errorMessage);</span>
+        }
+
+<span class="nc" id="L81">        return forwardToJsp;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>

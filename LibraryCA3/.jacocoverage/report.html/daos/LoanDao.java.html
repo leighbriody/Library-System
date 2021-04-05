@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>LoanDao.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;LibraryCA3_02_01_21_Internationalised&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">daos</a> &gt; <span class="el_source">LoanDao.java</span></div><h1>LoanDao.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package daos;
+
+import business.Loan;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author Osama Kheireddine
+ */
+public class LoanDao extends Dao implements LoanDaoInterface {
+
+    public static void main(String[] args) {
+<span class="nc" id="L23">        LocalDate date = java.time.LocalDate.now();</span>
+        //date in two weeks
+<span class="nc" id="L25">        LocalDate dateInTwoWeeks = date.plusWeeks(2);</span>
+<span class="nc" id="L26">        System.out.println(dateInTwoWeeks);</span>
+<span class="nc" id="L27">    }</span>
+
+    public LoanDao(String databaseName) {
+<span class="nc" id="L30">        super(databaseName);</span>
+<span class="nc" id="L31">    }</span>
+
+    /**
+     * *
+     * This class will access the db and return all records where the userId
+     * matches &amp; all loans are active
+     *
+     * @param userId
+     * @return An ArrayList of books still on loan
+     */
+    @Override
+    /**
+     * This method will allow the user to see all the loans they currently have
+     * active
+     */
+    public ArrayList&lt;Loan&gt; allLoansActive(int userId) {
+        //create a connection object
+<span class="nc" id="L48">        Connection con = null;</span>
+        //Create a prepared statement object
+<span class="nc" id="L50">        PreparedStatement ps = null;</span>
+        //Create a result set object
+<span class="nc" id="L52">        ResultSet rs = null;</span>
+        //create an arraylist that will be used to hold the loans
+<span class="nc" id="L54">        ArrayList&lt;Loan&gt; output = new ArrayList();</span>
+
+        //we now need to try to execute a query &amp; use the parameter that is passed through this method
+        try {
+            //getConnection()
+<span class="nc" id="L59">            con = getConnection();</span>
+            //query to ask db
+<span class="nc" id="L61">            String query = &quot;SELECT * FROM loans WHERE user_id = ? AND date_returned is null&quot;;</span>
+            //prepare the statement
+<span class="nc" id="L63">            ps = con.prepareStatement(query);</span>
+            //bind the parameter to the value were looking for
+<span class="nc" id="L65">            ps.setInt(1, userId);</span>
+            //execute the query
+<span class="nc" id="L67">            rs = ps.executeQuery();</span>
+
+            //while loop to add the results to the arraylist
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            while (rs.next()) {</span>
+                //create an object of loans to add to the list
+<span class="nc" id="L72">                Loan l = new Loan(rs.getInt(&quot;loan_id&quot;), rs.getInt(&quot;book_id&quot;), rs.getInt(&quot;user_id&quot;), rs.getString(&quot;date_taken&quot;), rs.getString(&quot;due_date&quot;), rs.getString(&quot;date_returned&quot;));</span>
+                //add the loan to the list
+<span class="nc" id="L74">                output.add(l);</span>
+<span class="nc" id="L75">            }</span>
+            //catch statement in case of error
+<span class="nc" id="L77">        } catch (SQLException e) {</span>
+<span class="nc" id="L78">            System.out.println(&quot;Exception occured in allLoansActive() method: &quot; + e.getMessage());</span>
+        } //finally block to close the connection
+        finally {
+<span class="nc" id="L81">            try {</span>
+<span class="nc bnc" id="L82" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L83">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L85" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L86">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L88" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L89">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L91">            } catch (SQLException e) {</span>
+<span class="nc" id="L92">                System.out.println(&quot;Exception occured in the finally section of the allLoansActive() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L93">            }</span>
+<span class="nc" id="L94">        }</span>
+
+<span class="nc" id="L96">        return output;</span>
+    }
+
+    /**
+     * This method will allow the user to see all the loans they have made since
+     * joining the library
+     *
+     * @param userId
+     * @return All loans the user has made since joining the library
+     */
+    @Override
+
+    public ArrayList&lt;Loan&gt; allLoansMade(int userId) {
+        //create a connection object
+<span class="nc" id="L110">        Connection con = null;</span>
+        //Create a prepared statement object
+<span class="nc" id="L112">        PreparedStatement ps = null;</span>
+        //Create a result set object
+<span class="nc" id="L114">        ResultSet rs = null;</span>
+        //create an arraylist that will be used to hold the loans
+<span class="nc" id="L116">        ArrayList&lt;Loan&gt; output = new ArrayList();</span>
+
+        //we now need to try to execute a query &amp; use the parameter that is passed through this method
+        try {
+            //getConnection()
+<span class="nc" id="L121">            con = getConnection();</span>
+            //query to ask db
+<span class="nc" id="L123">            String query = &quot;SELECT * FROM loans WHERE user_id = ?&quot;;</span>
+            //prepare the statement
+<span class="nc" id="L125">            ps = con.prepareStatement(query);</span>
+            //bind the parameter to the value were looking for
+<span class="nc" id="L127">            ps.setInt(1, userId);</span>
+            //execute the query
+<span class="nc" id="L129">            rs = ps.executeQuery();</span>
+
+            //while loop to add the results to the arraylist
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            while (rs.next()) {</span>
+                //create an object of loans to add to the list
+<span class="nc" id="L134">                Loan l = new Loan(rs.getInt(&quot;loan_id&quot;), rs.getInt(&quot;book_id&quot;), rs.getInt(&quot;user_id&quot;), rs.getString(&quot;date_taken&quot;), rs.getString(&quot;due_date&quot;), rs.getString(&quot;date_returned&quot;));</span>
+                //add the loan to the list
+<span class="nc" id="L136">                output.add(l);</span>
+<span class="nc" id="L137">            }</span>
+            //catch statement in case of error
+<span class="nc" id="L139">        } catch (SQLException e) {</span>
+<span class="nc" id="L140">            System.out.println(&quot;Exception occured in allLoansMade() method: &quot; + e.getMessage());</span>
+        } //finally block to close the connection
+        finally {
+<span class="nc" id="L143">            try {</span>
+<span class="nc bnc" id="L144" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L145">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L147" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L148">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L150" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L151">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L153">            } catch (SQLException e) {</span>
+<span class="nc" id="L154">                System.out.println(&quot;Exception occured in the finally section of the allLoansMade() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L155">            }</span>
+<span class="nc" id="L156">        }</span>
+
+<span class="nc" id="L158">        return output;</span>
+    }
+
+    /**
+     * This method creates a Loan for a User given the appropriate parameters
+     * passed through
+     *
+     * @param book_id
+     * @param user_id
+     * @param date_taken
+     * @param due_date
+     * @return A boolean based off of the success/failure to create a Loan
+     */
+    @Override
+    public boolean createLoan(int book_id, int user_id, String date_taken, String due_date) {
+        //create a connection object
+<span class="nc" id="L174">        Connection con = null;</span>
+        //Create a prepared statement object
+<span class="nc" id="L176">        PreparedStatement ps = null;</span>
+        //Create a rowsAffected
+<span class="nc" id="L178">        int rowsAffected = 0;</span>
+        //create a flag for a successful creation
+<span class="nc" id="L180">        boolean successfulLoan = false;</span>
+
+        //we now need to try to execute a query &amp; use the parameter that is passed through this method
+        try {
+            //getConnection()
+<span class="nc" id="L185">            con = getConnection();</span>
+            //query to ask db
+<span class="nc" id="L187">            String query = &quot;INSERT INTO loans (book_id, user_id, date_taken, due_date) VALUES (?,?,?,?)&quot;;</span>
+            //prepare the statement
+<span class="nc" id="L189">            ps = con.prepareStatement(query);</span>
+            //bind the parameter to the value were looking for
+<span class="nc" id="L191">            ps.setInt(1, book_id);</span>
+<span class="nc" id="L192">            ps.setInt(2, user_id);</span>
+<span class="nc" id="L193">            ps.setString(3, date_taken);</span>
+<span class="nc" id="L194">            ps.setString(4, due_date);</span>
+            //execute the query
+<span class="nc" id="L196">            rowsAffected = ps.executeUpdate();</span>
+
+            //add the loan to the table
+<span class="nc bnc" id="L199" title="All 2 branches missed.">            if (rowsAffected &gt; 0) {</span>
+<span class="nc" id="L200">                successfulLoan = true;</span>
+            }
+            //catch statement in case of error
+<span class="nc" id="L203">        } catch (SQLException e) {</span>
+<span class="nc" id="L204">            System.out.println(&quot;Exception occured in allLoansMade() method: &quot; + e.getMessage());</span>
+        } //finally block to close the connection
+        finally {
+<span class="nc" id="L207">            try {</span>
+<span class="nc bnc" id="L208" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L209">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L211" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L212">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L214">            } catch (SQLException e) {</span>
+<span class="nc" id="L215">                System.out.println(&quot;Exception occured in the finally section of the allLoansMade() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L216">            }</span>
+<span class="nc" id="L217">        }</span>
+
+<span class="nc" id="L219">        return successfulLoan;</span>
+    }
+
+    /**
+     *
+     * @param book_id
+     * @param user_id
+     * @return A boolean based off the success/failure to find a loaned Book for
+     * a given User
+     */
+    @Override
+    public boolean isBookOnLoan(int book_id, int user_id) {
+        //a flag to say if the book is on loan or not
+<span class="nc" id="L232">        boolean isBookOnLoan = false;</span>
+        //create a connection object
+<span class="nc" id="L234">        Connection con = null;</span>
+        //Create a prepared statement object
+<span class="nc" id="L236">        PreparedStatement ps = null;</span>
+        //Create a result set object
+<span class="nc" id="L238">        ResultSet rs = null;</span>
+
+        //we now need to try to execute a query &amp; use the parameters passed through this method
+        try {
+            //getConnection()
+<span class="nc" id="L243">            con = getConnection();</span>
+            //query to ask db
+<span class="nc" id="L245">            String query = &quot;SELECT * FROM loans WHERE book_id = ? AND user_id = ? AND date_returned IS NULL&quot;;</span>
+            //prepare the statement
+<span class="nc" id="L247">            ps = con.prepareStatement(query);</span>
+            //bind the parameter to the value were looking for
+<span class="nc" id="L249">            ps.setInt(1, book_id);</span>
+<span class="nc" id="L250">            ps.setInt(2, user_id);</span>
+            //execute the query
+<span class="nc" id="L252">            rs = ps.executeQuery();</span>
+
+            //if the book is on loan...
+<span class="nc bnc" id="L255" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L256">                isBookOnLoan = true;</span>
+            }
+            //catch statement in case of error
+<span class="nc" id="L259">        } catch (SQLException e) {</span>
+<span class="nc" id="L260">            System.out.println(&quot;Exception occured in allLoansMade() method: &quot; + e.getMessage());</span>
+        } //finally block to close the connection
+        finally {
+<span class="nc" id="L263">            try {</span>
+<span class="nc bnc" id="L264" title="All 6 branches missed.">                if (rs != null) {</span>
+<span class="nc" id="L265">                    rs.close();</span>
+                }
+<span class="nc bnc" id="L267" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L268">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L270" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L271">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L273">            } catch (SQLException e) {</span>
+<span class="nc" id="L274">                System.out.println(&quot;Exception occured in the finally section of the allLoansMade() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L275">            }</span>
+<span class="nc" id="L276">        }</span>
+
+<span class="nc" id="L278">        return isBookOnLoan;</span>
+    }
+    
+    /**
+     * 
+     * @param date_returned
+     * @param book_id
+     * @param user_id
+     * @return A boolean based off of the success/failure to return a Book for a given User
+     */
+    @Override
+    public boolean returnBook(String date_returned, int book_id, int user_id) {
+//a flag to say if the book is on loan or not
+<span class="nc" id="L291">        boolean isBookReturned = false;</span>
+        //create a connection object
+<span class="nc" id="L293">        Connection con = null;</span>
+        //Create a prepared statement object
+<span class="nc" id="L295">        PreparedStatement ps = null;</span>
+        //rowsaffected
+<span class="nc" id="L297">        int rowsAffected = 0;</span>
+
+        //we now need to try to execute a query &amp; use the parameters passed through this method
+        try {
+            //getConnection()
+<span class="nc" id="L302">            con = getConnection();</span>
+            //query to ask db
+<span class="nc" id="L304">            String query = &quot;UPDATE loans SET date_returned = ? WHERE user_id = ? AND book_id = ?&quot;;</span>
+            //prepare the statement
+<span class="nc" id="L306">            ps = con.prepareStatement(query);</span>
+            //bind the parameter to the value were looking for
+<span class="nc" id="L308">            ps.setString(1, date_returned);</span>
+<span class="nc" id="L309">            ps.setInt(2, user_id);</span>
+<span class="nc" id="L310">            ps.setInt(3, book_id);</span>
+            //execute the query
+<span class="nc" id="L312">            rowsAffected = ps.executeUpdate();</span>
+
+            //if the book is on loan...
+<span class="nc bnc" id="L315" title="All 2 branches missed.">            if (rowsAffected &gt; 0) {</span>
+<span class="nc" id="L316">                isBookReturned = true;</span>
+            }
+            //catch statement in case of error
+<span class="nc" id="L319">        } catch (SQLException e) {</span>
+<span class="nc" id="L320">            System.out.println(&quot;Exception occured in allLoansMade() method: &quot; + e.getMessage());</span>
+        } //finally block to close the connection
+        finally {
+<span class="nc" id="L323">            try {</span>
+<span class="nc bnc" id="L324" title="All 6 branches missed.">                if (ps != null) {</span>
+<span class="nc" id="L325">                    ps.close();</span>
+                }
+<span class="nc bnc" id="L327" title="All 6 branches missed.">                if (con != null) {</span>
+<span class="nc" id="L328">                    freeConnection(con);</span>
+                }
+<span class="nc" id="L330">            } catch (SQLException e) {</span>
+<span class="nc" id="L331">                System.out.println(&quot;Exception occured in the finally section of the allLoansMade() method: &quot; + e.getMessage());</span>
+<span class="nc" id="L332">            }</span>
+<span class="nc" id="L333">        }</span>
+
+<span class="nc" id="L335">        return isBookReturned;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>
